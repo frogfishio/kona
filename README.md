@@ -34,15 +34,15 @@ To do the same in a manner that can be replicated to multitude of services:
 
 1. Copy everything in hello/builtin folder into a separate folder (preferably a repository). This will form the basis for your new micro service
 2. Go into your new micro service folder and run "npm init" . This will initialise your micro service project
-4. Run: npm install @frogfish/engine --no-bin-links
-5. Finally, just like the above run your service as: DEBUG='engine\*' node node_modules/@frogfish/engine/engine -c demo/hello/builtin/hello-service.yaml --root \$PWD
+4. Run: npm install @frogfish/kona --no-bin-links
+5. Finally, just like the above run your service as: DEBUG='engine\*' node node_modules/@frogfish/kona/engine -c demo/hello/builtin/hello-service.yaml --root \$PWD
 6. curl http://localhost:8888/v1/hello
 
 This shuld give you the same result and voila, you've got your micro service running
 
 ## Installation
 
-npm install --no-bin-links @frogfish/engine
+npm install --no-bin-links @frogfish/kona
 
 ## Scheduler
 
