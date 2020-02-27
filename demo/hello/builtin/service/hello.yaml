@@ -1,0 +1,48 @@
+swagger: "2.0"
+info:
+  title: Hello service
+  description: Service that says hello in fluent JSON
+  version: 1.0.0
+host: localhost
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  "/hello":
+    get:
+      summary: Returns hello
+      description: |
+        Returns hello
+      tags:
+        - Hello
+      responses:
+        "200":
+          description: Hello World
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Hello"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Hello:
+    properties:
+      hello:
+        type: string
+        description: String containing hello message
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+securityDefinitions:
+  job_auth:
+    type: basic

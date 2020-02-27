@@ -1,0 +1,19 @@
+system:
+  id: hello-world
+  listen: 127.0.0.1
+  port: 8888
+  salt: some-random-salt-text
+  # root: /path/to/service/root : default = current folder
+
+  folders:
+    - /tmp
+
+  log:
+    file: /tmp/hello.log
+    level: debug
+
+services:
+  - /demo/hello/builtin/service/hello.yaml
+
+handlers:
+  - /build/debug/demo/hello/builtin/handlers

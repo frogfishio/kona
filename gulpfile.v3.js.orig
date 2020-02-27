@@ -1,0 +1,46 @@
+
+var gulp = require('gulp');
+var ts = require('gulp-typescript');
+
+gulp.task('clean', function () {
+    var del = require('del');
+    del(['dist', 'build', 'test/**/*.js', 'test/**/*.map', 'src/**/*.js', 'src/**/*.map']);
+});
+
+gulp.task('compile-dist', function () {
+    var fs = require('fs');
+    var del = require('del');
+    var tsProject = ts.createProject('./tsconfig.json');
+
+    var pkg = require('./package');
+    delete pkg.devDependencies;
+    delete pkg.scripts;
+
+    del('build/release').then(() => {
+        gulp.src(['src/**/*.ts', '!src/mock/**/*']).pipe(tsProject()).js.pipe(gulp.dest('build/release'));
+    });
+});
+
+gulp.task('compile', function () {
+    var del = require('del');
+    var tsProject = ts.createProject('./tsconfig.json');
+
+    del('build/debug').then(() => {
+        gulp.src(['src/**/*.ts', 'demo/**/*.ts', '!src/mock/**/*']).pipe(tsProject()).js.pipe(gulp.dest('build/debug'));
+    });
+});
+
+
+gulp.task('prepare-debug', function () {
+    var fs = require('fs');
+    gulp.src('test/support/*').pipe(gulp.dest('build/debug/support'));
+    gulp.src('test/templates/*').pipe(gulp.dest('build/debug/templates'));
+ });
+
+gulp.task('dist', function () {
+    var fs = require('fs');
+    var pkg = require('./package');
+    delete pkg.devDependencies;
+    delete pkg.scripts;
+    fs.writeFileSync('build/release/package.json', JSON.stringify(pkg, null, 2));
+});

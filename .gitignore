@@ -1,0 +1,15 @@
+.*
+*.rdb
+*.js
+*.map
+*.log
+!gulpfile.js
+!.gitignore
+
+node_modules
+/dist
+/build
+/coverage
+/debug
+
+/test/service.yaml
