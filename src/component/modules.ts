@@ -48,9 +48,10 @@ export class Modules implements Component {
     }
   }
 
-  init(): Promise<any> {
+  async init(): Promise<any> {
     logger.info('Initialising modules');
     if (!this._conf) {
+      logger.debug('No modules to configure');
       return Promise.resolve();
     }
 
@@ -65,7 +66,7 @@ export class Modules implements Component {
       const modlist = [];
       const fs = require('fs');
       for (const src of this.modules) {
-        fs.readdirSync(src).forEach(item => {
+        fs.readdirSync(src).forEach((item) => {
           if (item.indexOf('.js') === item.length - 3) {
             const instance = require(src + '/' + item);
 
@@ -84,14 +85,14 @@ export class Modules implements Component {
               return mod.init();
             });
           }, Promise.resolve())
-          .then(result => {
+          .then((result) => {
             return resolve(this);
           });
       }
     });
   }
 
-  release(): Promise<any> {
+  async release(): Promise<any> {
     return Promise.resolve();
   }
 }
