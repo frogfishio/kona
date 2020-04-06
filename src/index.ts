@@ -397,9 +397,9 @@ export class Engine {
           loadList.push('cache');
         }
 
-        if (this._configuration.get('services')) {
-          loadList.push('services');
-        }
+        // if (this._configuration.get('services')) {
+        //   loadList.push('services');
+        // }
 
         if (this._configuration.get('registry')) {
           loadList.push('registry');
