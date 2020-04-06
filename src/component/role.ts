@@ -140,7 +140,12 @@ export class Role implements Component {
     });
   }
 
-  init(): Promise<any> {
+  async init(): Promise<any> {
+    if(!this.conf) {
+      logger.info('No roles to configure');
+      return;
+    }
+
     logger.info('Initialising roles');
     const roleCodes = Object.getOwnPropertyNames(this.conf);
 
@@ -165,7 +170,7 @@ export class Role implements Component {
     }, Promise.resolve());
   }
 
-  release(): Promise<any> {
+  async release(): Promise<any> {
     return Promise.resolve();
   }
 }
