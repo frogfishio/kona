@@ -6,7 +6,7 @@ export class Configuration implements Component {
   constructor(private configPath: string, private override?: any) {}
 
   get(name: string) {
-    return this.conf[name] || {};
+    return this.conf[name];
   }
 
   set(name: string, value: any) {
