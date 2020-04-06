@@ -436,9 +436,10 @@ export class Engine {
           loadList.push('templates');
         }
 
-        if (this._configuration.get('roles')) {
-          loadList.push('roles');
-        }
+        // if (this._configuration.get('roles')) {
+        //   loadList.push('roles');
+        // }
+        loadList.push('roles');
 
         if (this._configuration.get('user')) {
           loadList.push('user');
