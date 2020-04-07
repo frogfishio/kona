@@ -117,7 +117,7 @@ export class Cache implements Component {
     return this._memory.set(`${context}-${key}`, value, ttl);
   }
   async clearGlobal(context: string, key?: string) {
-    //TODO: global context management - this now can't delete whole context
+    console.log('Clearing global ' + context + ' / ' + key);
     return this._memory.remove(`${context}-${key}`);
   }
 

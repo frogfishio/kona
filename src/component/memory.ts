@@ -127,7 +127,7 @@ export class Memory implements Component {
   }
 
   async remove(key: string) {
-    this.client.del(this.id + key);
+    this.client.del(this.id + '-' + key);
   }
 
   private encrypt(secret, data) {
