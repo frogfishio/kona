@@ -23,7 +23,7 @@ export class Auth implements Component {
         request.get(
           {
             url: this.config.authenticator.resolve,
-            json: true
+            json: true,
           },
           (err, httpResponse, body) => {
             if (err) {
@@ -48,7 +48,7 @@ export class Auth implements Component {
     }
 
     logger.debug('Getting OAUTH TOKEN: ' + split[1]);
-    return this.engine.token.resolve(split[1]).catch(err => {
+    return this.engine.token.resolve(split[1]).catch((err) => {
       if (err.error === 'not_found') {
         return Promise.reject(
           new ApplicationError('auth_error', 'Invalid autentication token', 'system_auth_resolve3')
@@ -61,9 +61,9 @@ export class Auth implements Component {
 
   /**
    * Force creation of auth token outside of standard RBAC. Dangerous!
-   * @param userData 
-   * @param permissions 
-   * @param ttl 
+   * @param userData
+   * @param permissions
+   * @param ttl
    */
   async issue(userData: any, permissions: Array<string>, ttl?: number) {
     const user = userData || {};
@@ -73,7 +73,7 @@ export class Auth implements Component {
 
     return this.engine.token.create(user, ttl || this.config.bearerTokenTTL);
   }
-  
+
   async authenticate(params, context?: string) {
     // Authenticate using remote AUTH provider
     if (this.config.authenticator && this.config.authenticator.type === 'remote') {
@@ -83,7 +83,7 @@ export class Auth implements Component {
           {
             url: this.config.authenticator.auth,
             form: params,
-            json: true
+            json: true,
           },
           (err, httpResponse, body) => {
             if (err) {
@@ -116,6 +116,7 @@ export class Auth implements Component {
     const user = await userAPI.getUserByEmailAndPassword(params.email, params.password, context);
     this.engine.audit.create(user._uuid, 'auth', `User authenticated by password`);
 
+    await userAPI.resetUserPermissionsCache(user._uuid);
     user.permissions = (await userAPI.getUserPermissions(user._uuid)) || [];
     user.contexts = (await accountAPI.get(user.account)).contexts || [];
 
@@ -126,7 +127,8 @@ export class Auth implements Component {
     logger.debug(`Authenticating by code: ${JSON.stringify(params)} with config ${JSON.stringify(this.config)}`);
 
     return this.engine.token.create(await this.engine.authenticate(params), this.config.bearerTokenTTL);
-  }l
+  }
+  l;
 
   private static sanitizeParams(params) {
     return {
@@ -135,7 +137,7 @@ export class Auth implements Component {
       email: params.email,
       password: params.password,
       client_id: params.client_id,
-      code: params.code
+      code: params.code,
     };
   }
 
@@ -191,6 +193,6 @@ export class Auth implements Component {
   }
 }
 
-export default function(engine: Engine) {
+export default function (engine: Engine) {
   return new Auth(engine);
 }
