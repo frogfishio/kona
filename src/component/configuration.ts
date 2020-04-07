@@ -77,6 +77,8 @@ export class Configuration implements Component {
 
     conf.system.id = process.env.ENGINE_SYSTEM_ID ? process.env.ENGINE_SYSTEM_ID : conf.system.id;
 
+    conf.system.salt = process.env.ENGINE_SYSTEM_SALT ? process.env.ENGINE_SYSTEM_SALT : conf.system.salt;
+
     conf.system.listen = process.env.ENGINE_SYSTEM_LISTEN ? process.env.ENGINE_SYSTEM_LISTEN : conf.system.listen;
 
     conf.system.port = process.env.ENGINE_SYSTEM_PORT ? parseInt(process.env.ENGINE_SYSTEM_PORT) : conf.system.port;
