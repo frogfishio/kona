@@ -25,6 +25,14 @@ export class Files implements Component {
     }
 
     logger.info('Initialising file store');
+
+    const clone = JSON.parse(JSON.stringify(this.conf));
+    for (const name of Object.getOwnPropertyNames(clone)) {
+      if (clone[name].secret) {
+        clone[name].secret = 'PROTECTED';
+      }
+    }
+    logger.debug(`File store configuration ${JSON.stringify(clone, null, 2)}`);
     const names = Object.getOwnPropertyNames(this.conf);
     return names.reduce((promise, connectorName) => {
       return promise.then(() => {
@@ -54,7 +62,7 @@ export class Files implements Component {
   async create(fileName: string, file: ReadableStream, fileStoreName?: string, meta?: any): Promise<any> {
     fileStoreName = fileStoreName || Object.getOwnPropertyNames(this.conf)[0];
 
-    return this.connectors[fileStoreName].create(file).then(result => {
+    return this.connectors[fileStoreName].create(file).then((result) => {
       if (!this.conf[fileStoreName].track) {
         return Promise.resolve({ id: result.id });
       }
@@ -66,7 +74,7 @@ export class Files implements Component {
         mime: result.mime,
         name: fileName,
         meta: meta,
-        _uuid: result.id
+        _uuid: result.id,
       };
 
       if (!fileInfo.mime) {
@@ -82,7 +90,7 @@ export class Files implements Component {
           name: fileInfo.name,
           digest: fileInfo.digest,
           length: fileInfo.length,
-          mime: fileInfo.mime
+          mime: fileInfo.mime,
         });
       });
     });
@@ -102,8 +110,8 @@ export class Files implements Component {
 
     // DEPRECATED: include payload
     if (includePayload) {
-      return this.db.get('_files_' + fileStoreName, fileId).then(result => {
-        return this.connectors[fileStoreName].get(result._uuid).then(payload => {
+      return this.db.get('_files_' + fileStoreName, fileId).then((result) => {
+        return this.connectors[fileStoreName].get(result._uuid).then((payload) => {
           result.payload = payload;
           return Promise.resolve(result);
         });
