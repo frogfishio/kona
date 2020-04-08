@@ -82,6 +82,12 @@ Environment variables for running in containers
 ### File storage
 - ENGINE_FILE_{file type}_{file property}
 
+- ENGINE_FILE_CONTEXT - context for storing files e.g. 'myfiles'
+- ENGINE_FILE_STORE_TYPE - local | s3
+- ENGINE_FILE_STORE - folder/bucket for storing files e.g. 'my-files'
+- ENGINE_FILE_S3_KEY - S3 key
+- ENGINE_FILE_S3_SECRET - S3 Secret key
+
 Database
 - ENGINE_DB_NAME - name of database
 - ENGINE_DB_HOSTS - database hosts e.g. 12.12.12.12:12345 OR 12.12.12.12:12345,22.22.22.22:12345
