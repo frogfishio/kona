@@ -386,7 +386,6 @@ export class Engine {
 
         if (this._configuration.get('memory')) {
           loadList.push('memory');
-
           loadList.push('manifest');
           // Load session if memory is enabled
           // TODO: add session config
@@ -396,10 +395,6 @@ export class Engine {
         if (this._configuration.get('cache')) {
           loadList.push('cache');
         }
-
-        // if (this._configuration.get('services')) {
-        //   loadList.push('services');
-        // }
 
         if (this._configuration.get('registry')) {
           loadList.push('registry');
@@ -415,9 +410,9 @@ export class Engine {
 
         loadList.push('modules');
 
-        if (this._configuration.get('file')) {
-          loadList.push('file');
-        }
+        // if (this._configuration.get('file')) {
+        // }
+        loadList.push('file');
 
         if (this._configuration.get('connectors')) {
           loadList.push('connector');
@@ -436,9 +431,6 @@ export class Engine {
           loadList.push('templates');
         }
 
-        // if (this._configuration.get('roles')) {
-        //   loadList.push('roles');
-        // }
         loadList.push('roles');
 
         if (this._configuration.get('user')) {

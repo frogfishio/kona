@@ -49,12 +49,6 @@ export class Configuration implements Component {
             this.conf['system'].root = this.root() + '/' + this.conf['system'].root;
           }
         }
-
-        // console.log(
-        //   `***[Configuration]***********************\n${JSON.stringify(
-        //     this.conf
-        //   )},***[/Configuration]**********************`
-        // );
         resolve();
       } catch (err) {
         reject(err);
@@ -120,7 +114,7 @@ export class Configuration implements Component {
             const parts = host.split(':');
             conf.memory.hosts.push({
               host: parts[0],
-              port: parseInt(parts[1])
+              port: parseInt(parts[1]),
             });
           }
         } else {
@@ -160,14 +154,27 @@ export class Configuration implements Component {
       }
     }
 
+    const ctx = process.env.ENGINE_FILE_CONTEXT;
+
+    if (ctx) {
+      let file = conf.file || {};
+      file[ctx] = file[ctx] || {};
+      file[ctx].type = file[ctx].type || process.env.ENGINE_FILE_STORE_TYPE;
+      file[ctx].store = file[ctx].store || process.env.ENGINE_FILE_STORE;
+
+      if (file[ctx].type === 's3') {
+        file[ctx].key = file[ctx].key || process.env.ENGINE_FILE_S3_KEY;
+        file[ctx].secret = file[ctx].secret || process.env.ENGINE_FILE_S3_SECRET;
+      }
+
+      conf.file = file;
+    }
+
     // process file configs if any
     const fileconf = {};
     for (const name of Object.getOwnPropertyNames(process.env)) {
       if (name.toLowerCase().indexOf('engine_file_') === 0) {
-        const parts = name
-          .toLowerCase()
-          .split('_')
-          .splice(2);
+        const parts = name.toLowerCase().split('_').splice(2);
         if (!fileconf[parts[0]]) {
           fileconf[parts[0]] = {};
         }
