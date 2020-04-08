@@ -170,19 +170,19 @@ export class Configuration implements Component {
       conf.file = file;
     }
 
-    // process file configs if any
-    const fileconf = {};
-    for (const name of Object.getOwnPropertyNames(process.env)) {
-      if (name.toLowerCase().indexOf('engine_file_') === 0) {
-        const parts = name.toLowerCase().split('_').splice(2);
-        if (!fileconf[parts[0]]) {
-          fileconf[parts[0]] = {};
-        }
-        fileconf[parts[0]][parts[1]] = process.env[name];
-      }
-    }
+    // // process file configs if any
+    // const fileconf = {};
+    // for (const name of Object.getOwnPropertyNames(process.env)) {
+    //   if (name.toLowerCase().indexOf('engine_file_') === 0) {
+    //     const parts = name.toLowerCase().split('_').splice(2);
+    //     if (!fileconf[parts[0]]) {
+    //       fileconf[parts[0]] = {};
+    //     }
+    //     fileconf[parts[0]][parts[1]] = process.env[name];
+    //   }
+    // }
 
-    conf.file = require('../util/merge')(conf.file, fileconf);
+    // conf.file = require('../util/merge')(conf.file, fileconf);
 
     return conf;
   }
