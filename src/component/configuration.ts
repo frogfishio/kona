@@ -161,6 +161,7 @@ export class Configuration implements Component {
       file[ctx] = file[ctx] || {};
       file[ctx].type = file[ctx].type || process.env.ENGINE_FILE_STORE_TYPE;
       file[ctx].store = file[ctx].store || process.env.ENGINE_FILE_STORE;
+      file[ctx].track = true;
 
       if (file[ctx].type === 's3') {
         file[ctx].key = file[ctx].key || process.env.ENGINE_FILE_S3_KEY;
