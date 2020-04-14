@@ -4,7 +4,7 @@ module.exports = (data: any) => {
   }
   let res = {};
   for (const name of Object.getOwnPropertyNames(data)) {
-    if (data[name] || data.name === false || data.name === 0) {
+    if (data[name] || data[name] === false || data[name] === 0) {
       res[name] = data[name];
     }
   }
