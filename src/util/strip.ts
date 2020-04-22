@@ -1,3 +1,6 @@
+/**
+ * @deprecated use core util instead
+ */
 module.exports = (data: any) => {
   if (!data) {
     return data;
