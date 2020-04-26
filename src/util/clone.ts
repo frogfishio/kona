@@ -1,3 +1,6 @@
+/**
+ * @deprecated use core util instead
+ */
 module.exports.cloneSelective = (source, exclude, merge) => {
   const clone = {};
   let excludeList = exclude || [];
