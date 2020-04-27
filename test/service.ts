@@ -4,7 +4,7 @@ let engine: Engine;
 
 const chai = require('chai');
 const expect = chai.expect;
-const request = require('./request');
+const request = require('../src/util/request');
 
 describe('Service', () => {
   beforeEach(async () => {

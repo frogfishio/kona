@@ -36,7 +36,9 @@ export class MongoDBProtocol implements DB {
         connectUrl += '/' + this.conf.name;
       } else {
         for (let i = 0; i < this.conf.hosts.length; i++) {
-          connectUrl += `${this.conf.hosts[0].host}:${this.conf.hosts[i].port}${(i < this.conf.hosts.length - 1) ? ',': ''}`;
+          connectUrl += `${this.conf.hosts[0].host}:${this.conf.hosts[i].port}${
+            i < this.conf.hosts.length - 1 ? ',' : ''
+          }`;
         }
         connectUrl += `/${this.conf.name}?replicaSet=${this.conf.replicaset}`;
       }
@@ -44,21 +46,15 @@ export class MongoDBProtocol implements DB {
       logger.info('Connecting to MongoDB: ' + connectUrl);
 
       const MongoClient = mongo.MongoClient;
-      MongoClient.connect(
-        connectUrl,
-        { native_parser: true, useNewUrlParser: true },
-        (err, connection) => {
-          if (err) {
-            return reject(
-              new ApplicationError('database_error', null, '3249567821', err)
-            );
-          } else {
-            this.connection = connection;
-            this.db = connection.db(dbName);
-            return resolve();
-          }
+      MongoClient.connect(connectUrl, { native_parser: true, useNewUrlParser: true }, (err, connection) => {
+        if (err) {
+          return reject(new ApplicationError('database_error', null, '3249567821', err));
+        } else {
+          this.connection = connection;
+          this.db = connection.db(dbName);
+          return resolve();
         }
-      );
+      });
     });
   }
 
@@ -77,12 +73,7 @@ export class MongoDBProtocol implements DB {
       this.db.collection(collectionName, (err, coll) => {
         if (err) {
           return reject(
-            new ApplicationError(
-              'database_error',
-              'Error getting collection: ' + collectionName,
-              'sys_mdb_gc',
-              err
-            )
+            new ApplicationError('database_error', 'Error getting collection: ' + collectionName, 'sys_mdb_gc', err)
           );
         }
 
@@ -91,57 +82,37 @@ export class MongoDBProtocol implements DB {
     });
   }
 
-  async get(
-    collectionName: string,
-    uuid: string,
-    objectTypeName?: string,
-    fileds?: Array<string>
-  ): Promise<any> {
-    return this.find(collectionName, { where: { _uuid: uuid }, limit: 1 }).then(
-      result => {
-        if (!result) {
-          return Promise.reject(
-            new ApplicationError(
-              'not_found',
-              `${objectTypeName ? objectTypeName : 'Object'} ${uuid} not found`,
-              'sys_mdb_ge1'
-            )
-          );
-        }
-
-        if (!fileds) {
-          delete result._id;
-        }
-        return Promise.resolve(result);
+  async get(collectionName: string, uuid: string, objectTypeName?: string, fileds?: Array<string>): Promise<any> {
+    return this.find(collectionName, { where: { _uuid: uuid }, limit: 1 }).then((result) => {
+      if (!result) {
+        return Promise.reject(
+          new ApplicationError(
+            'not_found',
+            `${objectTypeName ? objectTypeName : 'Object'} ${uuid} not found`,
+            'sys_mdb_ge1'
+          )
+        );
       }
-    );
+
+      if (!fileds) {
+        delete result._id;
+      }
+      return Promise.resolve(result);
+    });
   }
 
-  async findOne(
-    collectionName: string,
-    criteria,
-    objectTypeName?: string,
-    fileds?: Array<string>
-  ): Promise<any> {
+  async findOne(collectionName: string, criteria, objectTypeName?: string, fileds?: Array<string>): Promise<any> {
     if (!criteria.where) {
       criteria = { where: criteria };
     }
 
     criteria.limit = 1;
 
-    return this.find(collectionName, criteria).then(result => {
+    return this.find(collectionName, criteria).then((result) => {
       if (!result) {
-        debug(
-          `One not found in collection ${collectionName} criteria ${JSON.stringify(
-            criteria
-          )}`
-        );
+        debug(`One not found in collection ${collectionName} criteria ${JSON.stringify(criteria)}`);
         return Promise.reject(
-          new ApplicationError(
-            'not_found',
-            `${objectTypeName ? objectTypeName : 'Object'} not found`,
-            'sys_mdb_fo1'
-          )
+          new ApplicationError('not_found', `${objectTypeName ? objectTypeName : 'Object'} not found`, 'sys_mdb_fo1')
         );
       }
 
@@ -157,16 +128,10 @@ export class MongoDBProtocol implements DB {
       params = { where: params };
     }
 
-    return this.getCollection(collectionName).then(collection => {
+    return this.getCollection(collectionName).then((collection) => {
       return new Promise((resolve, reject) => {
         if (!collection) {
-          return reject(
-            new ApplicationError(
-              'database_error',
-              'Collection not found',
-              'sys_mdb_gcol_null'
-            )
-          );
+          return reject(new ApplicationError('database_error', 'Collection not found', 'sys_mdb_gcol_null'));
         }
 
         const criteria = params.where || {};
@@ -247,14 +212,9 @@ export class MongoDBProtocol implements DB {
 
         if (params.as !== 'array' && params.limit === 1) {
           criteriaFilter._id = 0;
-          return collection.findOne(criteria, criteriaFilter, function(
-            err,
-            item
-          ) {
+          return collection.findOne(criteria, criteriaFilter, function (err, item) {
             if (err) {
-              return reject(
-                new ApplicationError('database_error', null, 'sys_mdb_fo', err)
-              );
+              return reject(new ApplicationError('database_error', null, 'sys_mdb_fo', err));
             }
 
             return resolve(item);
@@ -268,11 +228,7 @@ export class MongoDBProtocol implements DB {
           }
         }
 
-        debug(
-          `Searching with criteria ${JSON.stringify(
-            criteria
-          )} and filter ${JSON.stringify(criteriaFilter)}`
-        );
+        debug(`Searching with criteria ${JSON.stringify(criteria)} and filter ${JSON.stringify(criteriaFilter)}`);
 
         // this.db
         //   .collection('test_data')
@@ -285,14 +241,7 @@ export class MongoDBProtocol implements DB {
         collection.find(criteria, criteriaFilter, (err, result) => {
           if (err) {
             logger.error(err);
-            return reject(
-              new ApplicationError(
-                'database_error',
-                null,
-                'sys_mdb_gcol_ff',
-                err
-              )
-            );
+            return reject(new ApplicationError('database_error', null, 'sys_mdb_gcol_ff', err));
           }
 
           if (params.skip) {
@@ -333,7 +282,7 @@ export class MongoDBProtocol implements DB {
 
     console.log('Aggregating criteria: ' + JSON.stringify(criteria, null, 2));
 
-    return this.getCollection(collectionName).then(collection => {
+    return this.getCollection(collectionName).then((collection) => {
       return new Promise((resolve, reject) => {
         for (const i in criteria) {
           if (criteria[i].$match) {
@@ -343,9 +292,7 @@ export class MongoDBProtocol implements DB {
 
         collection.aggregate(criteria).toArray((err, data) => {
           if (err) {
-            return reject(
-              new ApplicationError('database_error', null, 'sys_mdb_ag', err)
-            );
+            return reject(new ApplicationError('database_error', null, 'sys_mdb_ag', err));
           }
 
           return resolve(data);
@@ -358,25 +305,15 @@ export class MongoDBProtocol implements DB {
     return new Promise((resolve, reject) => {
       if (!collectionName || !owner || !data) {
         return reject(
-          new ApplicationError(
-            'validation_error',
-            'Invalid method usage, parameters not defined',
-            'sys_mdb_crv1'
-          )
+          new ApplicationError('validation_error', 'Invalid method usage, parameters not defined', 'sys_mdb_crv1')
         );
       }
 
       if (typeof owner !== 'string') {
-        return reject(
-          new ApplicationError(
-            'validation_error',
-            'Owner must be of a string type',
-            'sys_mdb_crv2'
-          )
-        );
+        return reject(new ApplicationError('validation_error', 'Owner must be of a string type', 'sys_mdb_crv2'));
       }
 
-      return this.getCollection(collectionName).then(collection => {
+      return this.getCollection(collectionName).then((collection) => {
         const uuid = require('uuid');
         data._created = Date.now();
         data._owner = owner;
@@ -385,13 +322,10 @@ export class MongoDBProtocol implements DB {
 
         collection.insertOne(data, (err, result) => {
           if (err) {
+            logger.debug(`Was trying to insert into collectton${collectionName}, data: ${JSON.stringify(data)}`);
+            logger.error(err);
             return reject(
-              new ApplicationError(
-                'database_error',
-                'Error saving object to database',
-                'sys_mdb_sav',
-                err
-              )
+              new ApplicationError('database_error', 'Error saving object to database', 'sys_mdb_sav', err)
             );
           }
 
@@ -401,67 +335,50 @@ export class MongoDBProtocol implements DB {
     });
   }
 
-  async update(
-    collectionName: string,
-    idOrCriteria: string | any,
-    data: any,
-    objectTypeName?: string
-  ): Promise<any> {
-    const criteria =
-      typeof idOrCriteria === 'string' ? { _uuid: idOrCriteria } : idOrCriteria;
+  async update(collectionName: string, idOrCriteria: string | any, data: any, objectTypeName?: string): Promise<any> {
+    const criteria = typeof idOrCriteria === 'string' ? { _uuid: idOrCriteria } : idOrCriteria;
     const collection = await this.getCollection(collectionName);
 
-    logger.debug(
-      `Updating ${collectionName} with criteria: ${JSON.stringify(criteria)}`
-    );
+    logger.debug(`Updating ${collectionName} with criteria: ${JSON.stringify(criteria)}`);
 
     return new Promise((resolve, reject) => {
       data._updated = Date.now();
-      collection.update(
-        criteria,
-        { $set: data },
-        { multi: true },
-        (err, res) => {
-          if (err) {
+      collection.update(criteria, { $set: data }, { multi: true }, (err, res) => {
+        if (err) {
+          return reject(
+            new ApplicationError(
+              'database_error',
+              `Error updating ${objectTypeName ? objectTypeName : 'object'} in database`,
+              'sys_mdb_update1',
+              err
+            )
+          );
+        }
+
+        logger.debug(`Updated: ${JSON.stringify(res)}`);
+
+        if (typeof idOrCriteria === 'string') {
+          if (res.result.nModified === 1) {
+            return resolve({ id: idOrCriteria });
+          }
+
+          if (res.result.nModified === 0) {
             return reject(
               new ApplicationError(
-                'database_error',
-                `Error updating ${
-                  objectTypeName ? objectTypeName : 'object'
-                } in database`,
-                'sys_mdb_update1',
-                err
+                'not_found',
+                `${objectTypeName ? objectTypeName : 'Object'} ${idOrCriteria} not found`,
+                'sys_mdb_update2'
               )
             );
           }
-
-          logger.debug(`Updated: ${JSON.stringify(res)}`);
-
-          if (typeof idOrCriteria === 'string') {
-            if (res.result.nModified === 1) {
-              return resolve({ id: idOrCriteria });
-            }
-
-            if (res.result.nModified === 0) {
-              return reject(
-                new ApplicationError(
-                  'not_found',
-                  `${
-                    objectTypeName ? objectTypeName : 'Object'
-                  } ${idOrCriteria} not found`,
-                  'sys_mdb_update2'
-                )
-              );
-            }
-          }
-
-          return resolve({
-            found: res.result.n,
-            modified: res.result.nModified,
-            updated: res.result.ok
-          });
         }
-      );
+
+        return resolve({
+          found: res.result.n,
+          modified: res.result.nModified,
+          updated: res.result.ok,
+        });
+      });
     });
   }
 
@@ -490,16 +407,26 @@ export class MongoDBProtocol implements DB {
 
   async remove(collectionName: string, id: string): Promise<any> {
     return this.get(collectionName, id).then(() => {
-      return this.getCollection(collectionName).then(collection => {
+      return this.getCollection(collectionName).then((collection) => {
         return new Promise((resolve, reject) => {
           if (this.conf.purgeOnDelete === true) {
-            collection.remove({ _uuid: id }, { multi: true }, err => {
+            collection.remove({ _uuid: id }, { multi: true }, (err) => {
+              if (err) {
+                return reject(
+                  new ApplicationError('database_error', 'Error removing object from collection', 'sys_mdb_rm', err)
+                );
+              }
+
+              return resolve({ id: id });
+            });
+          } else {
+            collection.update({ _uuid: id }, { $set: { _deleted: true } }, (err) => {
               if (err) {
                 return reject(
                   new ApplicationError(
                     'database_error',
                     'Error removing object from collection',
-                    'sys_mdb_rm',
+                    'sys_mdb_remove_upd',
                     err
                   )
                 );
@@ -507,25 +434,6 @@ export class MongoDBProtocol implements DB {
 
               return resolve({ id: id });
             });
-          } else {
-            collection.update(
-              { _uuid: id },
-              { $set: { _deleted: true } },
-              err => {
-                if (err) {
-                  return reject(
-                    new ApplicationError(
-                      'database_error',
-                      'Error removing object from collection',
-                      'sys_mdb_remove_upd',
-                      err
-                    )
-                  );
-                }
-
-                return resolve({ id: id });
-              }
-            );
           }
         });
       });
@@ -533,38 +441,23 @@ export class MongoDBProtocol implements DB {
   }
 
   async purge(collectionName: string, id: string): Promise<any> {
-    return this.getCollection(collectionName).then(collection => {
+    return this.getCollection(collectionName).then((collection) => {
       return new Promise((resolve, reject) => {
         collection.findOne({ _uuid: id, _deleted: true }, {}, (foErr, item) => {
           if (foErr) {
-            return new ApplicationError(
-              'database_error',
-              'Error looking up deleted item',
-              'sys_mdb_gcol_pg1',
-              foErr
-            );
+            return new ApplicationError('database_error', 'Error looking up deleted item', 'sys_mdb_gcol_pg1', foErr);
           }
 
           if (!item) {
             return reject(
-              new ApplicationError(
-                'database_error',
-                'Cannot purge item that is not deleted',
-                'sys_mdb_gcol_pg2',
-                foErr
-              )
+              new ApplicationError('database_error', 'Cannot purge item that is not deleted', 'sys_mdb_gcol_pg2', foErr)
             );
           }
 
           collection.remove({ _uuid: id }, { multi: true }, (err, data) => {
             if (err) {
               return reject(
-                new ApplicationError(
-                  'database_error',
-                  'Error purging item with id: ' + id,
-                  'sys_mdb_pg',
-                  err
-                )
+                new ApplicationError('database_error', 'Error purging item with id: ' + id, 'sys_mdb_pg', err)
               );
             }
 
@@ -576,18 +469,13 @@ export class MongoDBProtocol implements DB {
   }
 
   async restore(collectionName: string, criteria: any): Promise<any> {
-    return this.getCollection(collectionName).then(collection => {
+    return this.getCollection(collectionName).then((collection) => {
       return new Promise((resolve, reject) => {
         criteria._deleted = true;
-        collection.update(criteria, { $set: { _deleted: false } }, err => {
+        collection.update(criteria, { $set: { _deleted: false } }, (err) => {
           if (err) {
             return reject(
-              new ApplicationError(
-                'database_error',
-                'Error restoring a deleted item',
-                'sys_mdb_pres',
-                err
-              )
+              new ApplicationError('database_error', 'Error restoring a deleted item', 'sys_mdb_pres', err)
             );
           }
         });
@@ -596,17 +484,12 @@ export class MongoDBProtocol implements DB {
   }
 
   async count(collectionName: string, criteria): Promise<any> {
-    return this.getCollection(collectionName).then(collection => {
+    return this.getCollection(collectionName).then((collection) => {
       return new Promise((resolve, reject) => {
         collection.count(criteria, (err, cnt) => {
           if (err) {
             return reject(
-              new ApplicationError(
-                'database_error',
-                'Error counting objects with given criteria',
-                'sys_mdb_cn',
-                err
-              )
+              new ApplicationError('database_error', 'Error counting objects with given criteria', 'sys_mdb_cn', err)
             );
           }
 
@@ -617,7 +500,7 @@ export class MongoDBProtocol implements DB {
   }
 
   async drop(collectionName: string): Promise<any> {
-    return this.getCollection(collectionName).then(collection => {
+    return this.getCollection(collectionName).then((collection) => {
       collection.drop();
       return Promise.resolve({ status: 'ok' });
     });

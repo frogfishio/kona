@@ -30,14 +30,14 @@ export class User implements Component {
       where: criteria,
       skip: skip,
       limit: limit,
-      filter: ['email', '_uuid', 'meta', 'account', '_created', 'status', 'verified', 'context']
+      filter: ['email', '_uuid', 'meta', 'account', '_created', 'status', 'verified', 'context'],
     });
   }
 
   async get(userId: string) {
     return this.db.findOne('_users', {
       where: { _uuid: userId },
-      filter: ['_uuid', 'email', 'meta', 'account', 'status', 'expire', 'verified', 'preferences']
+      filter: ['_uuid', 'email', 'meta', 'account', 'status', 'expire', 'verified', 'preferences'],
     });
   }
 
@@ -119,13 +119,13 @@ export class User implements Component {
   async updatePassword(userId: string, oldPasswordOrResetCode: string, newPassword: string) {
     const user = await this.db.findOne('_users', {
       where: { _uuid: userId },
-      filter: ['_uuid', 'email', 'meta', 'account', 'status', 'expire', 'verified', 'preferences']
+      filter: ['_uuid', 'email', 'meta', 'account', 'status', 'expire', 'verified', 'preferences'],
     });
 
     const reset = User.validateUpdatePassword(user, oldPasswordOrResetCode, newPassword);
     const value: any = {
       password: User.hash(newPassword),
-      reset: user.reset
+      reset: user.reset,
     };
 
     if (reset === true) {
@@ -144,12 +144,12 @@ export class User implements Component {
 
     const user = await this.db.findOne('_users', {
       where: { 'reset.code': userIdOrResetCode },
-      filter: ['_uuid', 'email', 'meta', 'account', 'status', 'expire', 'verified', 'preferences']
+      filter: ['_uuid', 'email', 'meta', 'account', 'status', 'expire', 'verified', 'preferences'],
     });
 
     const value: any = {
       password: User.hash(newPassword),
-      reset: user.reset
+      reset: user.reset,
     };
 
     value.reset.expired = true;
@@ -187,7 +187,7 @@ export class User implements Component {
     }
 
     return this.getUserByEmail(newEmail)
-      .then(foundUser => {
+      .then((foundUser) => {
         if (foundUser) {
           return Promise.reject(
             new ApplicationError(
@@ -199,7 +199,7 @@ export class User implements Component {
         }
       })
       .catch(() => {
-        return this.db.get('_users', userId).then(user => {
+        return this.db.get('_users', userId).then((user) => {
           if (User.hash(password, user.password.salt).hash !== user.password.hash) {
             return Promise.reject(
               new ApplicationError('validation_error', 'Invalid password', 'system_user_update_email_6')
@@ -213,7 +213,7 @@ export class User implements Component {
               email: newEmail,
               emailChanged: Date.now(),
               verified: false,
-              verify: crypto.randomBytes(16).toString('hex')
+              verify: crypto.randomBytes(16).toString('hex'),
             })
             .then(() => {
               this.engine.events.signal('user_email_changed', { user: user._uuid });
@@ -234,11 +234,11 @@ export class User implements Component {
   }
 
   async updateMeta(userId: string, meta: any, override?: any) {
-    return this.db.get('_users', userId).then(user => {
+    return this.db.get('_users', userId).then((user) => {
       const _meta = override || user.meta || {};
       const names = Object.getOwnPropertyNames(meta);
       const userConf = this.engine.configuration.get('user') || {
-        meta: {}
+        meta: {},
       };
 
       for (const name of names) {
@@ -266,7 +266,7 @@ export class User implements Component {
       return this.validateMeta(_meta).then(() => {
         return this.db
           .update('_users', userId, {
-            meta: _meta
+            meta: _meta,
           })
           .then(() => {
             this.engine.events.signal('user_changed', { user: user._uuid });
@@ -281,7 +281,7 @@ export class User implements Component {
   }
 
   async updatePreferences(userId: string, preferences: any, override?: any) {
-    return this.db.get('_users', userId).then(user => {
+    return this.db.get('_users', userId).then((user) => {
       const _preferences = override || user.preferences || override || {};
 
       for (const name of Object.getOwnPropertyNames(preferences)) {
@@ -291,9 +291,9 @@ export class User implements Component {
 
       return this.db
         .update('_users', userId, {
-          preferences: _preferences
+          preferences: _preferences,
         })
-        .then(res => {
+        .then((res) => {
           this.engine.events.signal('user_preferences_changed', { user: user._uuid });
           return Promise.resolve(res);
         });
@@ -313,7 +313,7 @@ export class User implements Component {
    * @param email
    */
   requestPasswordReset(email: string): Promise<any> {
-    return this.getUserByEmail(email).then(user => {
+    return this.getUserByEmail(email).then((user) => {
       return new Promise((resolve, reject) => {
         require('crypto').randomBytes(32, (err, buf) => {
           if (err) {
@@ -323,13 +323,13 @@ export class User implements Component {
           // TODO: fix, this is not guaranteed secure & unique
           return resolve(buf.toString('hex'));
         });
-      }).then(token => {
+      }).then((token) => {
         return this.db
           .update('_users', user._uuid, {
             reset: {
               code: token,
-              expires: Date.now() + 3600000 * 24
-            }
+              expires: Date.now() + 3600000 * 24,
+            },
           })
           .then(() => {
             this.engine.events.signal('user_password_reset_generated', { user: user._uuid, token: token });
@@ -340,7 +340,7 @@ export class User implements Component {
   }
 
   async listUserRoles(userId) {
-    return this.db.find('_user_roles', { user: userId }).then(roleset => {
+    return this.db.find('_user_roles', { user: userId }).then((roleset) => {
       if (!roleset) {
         return Promise.resolve([]);
       }
@@ -355,7 +355,7 @@ export class User implements Component {
   }
 
   async getUserIdByEmail(email: string, context?: string) {
-    return this.getUserByEmail(email, context).then(user => {
+    return this.getUserByEmail(email, context).then((user) => {
       return Promise.resolve({ id: user._uuid });
     });
   }
@@ -375,22 +375,6 @@ export class User implements Component {
 
     return user;
   }
-
-  // async getUserByEmailAndPassword(email: string, password: string, context?: string): Promise<any> {
-  //   return this.getUserByEmail(email, context).then(user => {
-  //     return new Promise((resolve, reject) => {
-  //       const pass = User.hash(password, user.password.salt);
-
-  //       if (pass.hash !== user.password.hash) {
-  //         return reject(
-  //           new ApplicationError('validation_error', 'Invalid email / password combination', 'system_user_getep')
-  //         );
-  //       }
-
-  //       return resolve(user);
-  //     });
-  //   });
-  // }
 
   async getUserByAccount(accountId: string, context?: string) {
     return this.db.findOne('_users', { account: accountId, context: context }, 'User');
@@ -416,10 +400,10 @@ export class User implements Component {
     }
 
     logger.debug('Getting user roles');
-    return this.listUserRoles(userId).then(roles => {
+    return this.listUserRoles(userId).then((roles) => {
       logger.debug(`Got roles ${JSON.stringify(roles)}`);
       const rolesAPI = this.engine.role;
-      return rolesAPI.getPermissionSet(roles).then(permissions => {
+      return rolesAPI.getPermissionSet(roles).then((permissions) => {
         this.engine.cache.set('_user_permissions', userId, permissions);
         logger.debug(`Roleset: ${JSON.stringify(roles)} resolves to permissions ${JSON.stringify(permissions)}`);
         return Promise.resolve(permissions);
@@ -427,26 +411,26 @@ export class User implements Component {
     });
   }
 
-  async addRoleToUser(userId, roleIdOrCode): Promise<any> {
+  private async _addRoleToUser(userId, roleIdOrCode): Promise<any> {
     logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
 
-    return this.get(userId).then(user => {
+    return this.get(userId).then((user) => {
       logger.debug(`User found ${JSON.stringify(user)}`);
       const roleAPI: Role = this.engine.role;
-      return roleAPI.get(roleIdOrCode).then(role => {
+      return roleAPI.get(roleIdOrCode).then((role) => {
         logger.debug(`Role found ${JSON.stringify(role)}`);
 
         return this.db
           .findOne('_user_roles', {
             user: user._uuid,
-            role: role._uuid
+            role: role._uuid,
           })
-          .then(userRole => {
+          .then((userRole) => {
             if (userRole) {
               return Promise.resolve({ id: user._uuid });
             }
           })
-          .catch(err => {
+          .catch((err) => {
             if (err.error !== 'not_found') {
               return Promise.reject(err);
             }
@@ -454,7 +438,7 @@ export class User implements Component {
             return this.db
               .create('_user_roles', this.engine.systemUser.account, {
                 user: user._uuid,
-                role: role._uuid
+                role: role._uuid,
               })
               .then(() => {
                 this.resetUserPermissionsCache(userId);
@@ -466,22 +450,87 @@ export class User implements Component {
     });
   }
 
-  async removeRoleFromUser(userId, roleIdOrCode): Promise<any> {
+  async addRoleToUser(userId: string, roleIdOrCode: string, scope?: string, requireActivation?: boolean): Promise<any> {
+    logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
+
+    const user = await this.get(userId);
+    logger.debug(`User found ${JSON.stringify(user)}`);
+    const role = await this.engine.role.get(roleIdOrCode);
+    logger.debug(`Role found ${JSON.stringify(role)}`);
+
+    const criteria: any = {
+      user: user._uuid,
+      role: role._uuid,
+    };
+
+    if (scope) {
+      criteria.scope = scope;
+    }
+
+    try {
+      const userRole = await this.db.findOne('_user_roles', criteria);
+
+      if (userRole) {
+        return { id: user._uuid };
+      }
+    } catch (err) {
+      if (err.error !== 'not_found') {
+        throw err;
+      }
+    }
+
+    const data: any = {
+      user: user._uuid,
+      role: role._uuid,
+    };
+
+    data.status = 'active';
+    if (requireActivation) {
+      data.status = 'activating';
+      data.activation = require('shortid').generate();
+    }
+
+    const result = await this.db.create('_user_roles', this.engine.systemUser.account, data);
+
+    this.resetUserPermissionsCache(userId);
+    logger.debug(`Role ${role.name} (Scope: ${scope ? scope : 'global'}) added to user ${user._uuid}`);
+    return { id: user._uuid };
+  }
+
+  async removeRoleFromUser(userId: string, roleIdOrCode: string, scope?: string): Promise<any> {
+    const role = await this.engine.role.get(roleIdOrCode);
+    const criteria: any = {
+      user: userId,
+      role: role._uuid,
+    };
+
+    if (scope) {
+      criteria.scope = scope;
+    }
+
+    const userRole = await this.db.findOne('_user_roles', criteria);
+    await this.db.remove('_user_roles', userRole._uuid);
+
+    this.engine.cache.clear('_user_permissions', userId);
+    return { id: userId };
+  }
+
+  private async _removeRoleFromUser(userId, roleIdOrCode): Promise<any> {
     const roleAPI: Role = this.engine.role;
 
-    return roleAPI.get(roleIdOrCode).then(role => {
+    return roleAPI.get(roleIdOrCode).then((role) => {
       return this.db
         .findOne('_user_roles', {
           user: userId,
-          role: role._uuid
+          role: role._uuid,
         })
-        .then(userRole => {
+        .then((userRole) => {
           return this.db.remove('_user_roles', userRole._uuid).then(() => {
             this.engine.cache.clear('_user_permissions', userId);
             return Promise.resolve({ id: userId });
           });
         })
-        .catch(err => {
+        .catch((err) => {
           if (err.error === 'not_found') {
             return Promise.resolve({ id: userId });
           }
@@ -500,7 +549,7 @@ export class User implements Component {
       verify: user.verify,
       expire: user.expire,
       reset: user.reset,
-      resetExpire: user.resetExpire
+      resetExpire: user.resetExpire,
     };
 
     if (skipMeta) {
@@ -653,14 +702,14 @@ export class User implements Component {
     return users.reduce((promise, user) => {
       return promise.then(() => {
         logger.info(`Verifying user ${user.email}`);
-        return this.getUserByEmail(user.email).catch(err => {
+        return this.getUserByEmail(user.email).catch((err) => {
           if (err.error === 'not_found') {
             const userData = {
               email: user.email,
               password: user.password,
-              meta: user.meta
+              meta: user.meta,
             };
-            return this.create(userData).then(result => {
+            return this.create(userData).then((result) => {
               return user.roles.reduce((ppromise, role) => {
                 return ppromise.then(() => {
                   logger.info(`Adding role ${role} to user ${user.email}`);
@@ -686,7 +735,7 @@ export class User implements Component {
 
     return {
       salt: salt,
-      hash: hash
+      hash: hash,
     };
   }
 
