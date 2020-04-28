@@ -16,9 +16,7 @@ describe('Role', () => {
   it('should create role', async () =>
     console.log(
       'Created role id -> ' +
-        (roleId = (
-          await engine.role.create({ name: 'role_' + time, permissions: ['one', 'two', 'three'] })
-        ).id)
+        (roleId = (await engine.role.create({ name: 'role_' + time, permissions: ['one', 'two', 'three'] })).id)
     ));
 
   it('should return', async () =>

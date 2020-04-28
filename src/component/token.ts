@@ -40,8 +40,9 @@ export class Token implements Component {
     const token: string = hmac.read().replace('=', '');
     const memstore = this.engine.memory;
     const payload = {
-      timestamp: timestamp,
-      data: Token.sanitiseUserData(userData)
+      issued: timestamp,
+      expires: timestamp + ttl * 1000,
+      data: Token.sanitiseUserData(userData),
     };
 
     logger.debug('Storing token payload :' + JSON.stringify(payload, null, 2));
@@ -50,13 +51,13 @@ export class Token implements Component {
     return Promise.resolve({
       access_token: token,
       token_type: 'bearer',
-      expires_in: ttl
+      expires_in: ttl,
     });
   }
 
   resolve(token: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      return this.engine.memory.get('token-' + token).then(resolvedData => {
+      return this.engine.memory.get('token-' + token).then((resolvedData) => {
         if (!resolvedData) {
           return reject(new ApplicationError('auth_error', `Token ${token} not found`, 'sys_tk_rs1'));
         }
@@ -91,7 +92,7 @@ export class Token implements Component {
       resource: user.resource,
       permissions: user.permissions,
       tokens: user.tokens,
-      contexts: user.contexts
+      contexts: user.contexts,
     };
   }
 }

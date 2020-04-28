@@ -21,19 +21,19 @@ export class Role implements Component {
       where: criteria,
       skip: skip,
       limit: limit,
-      filter: ['code', 'name', 'permissions', '_uuid']
+      filter: ['code', 'name', 'permissions', '_uuid'],
     });
   }
 
   get(roleIdOrCode: string): Promise<any> {
     logger.debug(`Getting role ${JSON.stringify(roleIdOrCode)}`);
     let criteria: any = {
-      code: roleIdOrCode
+      code: roleIdOrCode,
     };
 
     if (roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
       criteria = {
-        _uuid: roleIdOrCode
+        _uuid: roleIdOrCode,
       };
     }
 
@@ -47,14 +47,14 @@ export class Role implements Component {
 
       if (crit) {
         return this.get(crit)
-          .then(foundRole => {
+          .then((foundRole) => {
             if (foundRole) {
               return Promise.reject(
                 new ApplicationError('already_exists', 'Role already exists', 'system_role_create')
               );
             }
           })
-          .catch(err => {
+          .catch((err) => {
             if (err && err.error !== 'not_found') {
               return Promise.reject(err);
             }
@@ -71,7 +71,7 @@ export class Role implements Component {
     if (roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
       return this.db.update('_roles', roleIdOrCode, role);
     } else {
-      return this.get(roleIdOrCode).then(foundRole => {
+      return this.get(roleIdOrCode).then((foundRole) => {
         return this.db.update('_roles', foundRole._uuid, role);
       });
     }
@@ -81,25 +81,85 @@ export class Role implements Component {
     if (roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
       return this.db.remove('_roles', roleIdOrCode);
     } else {
-      return this.get(roleIdOrCode).then(foundRole => {
+      return this.get(roleIdOrCode).then((foundRole) => {
         return this.db.remove('_roles', foundRole._uuid);
       });
     }
   }
 
   listPermissions(roleId): Promise<any> {
-    return this.get(roleId).then(role => {
+    return this.get(roleId).then((role) => {
       return Promise.resolve(role.permissions || []);
     });
   }
 
-  getPermissionSet(roles): Promise<any> {
-    const self = this;
+  async getScopedPermissionSet(scoped: any): Promise<any> {
+    let criteria = [];
+    const index: any = {};
+    for (const scope of Object.getOwnPropertyNames(scoped)) {
+      for (const role of scoped[scope]) {
+        // index scopes
+        index[role] = index[role] || [];
+        if (index[role].indexOf(scope) === -1) {
+          index[role].push(scope);
+        }
+
+        // add to criteria
+        if (criteria.indexOf(role) === -1) {
+          criteria.push(role);
+        }
+      }
+    }
+
+    const foundRoles = await this.db.find('_roles', {
+      where: { _uuid: { $in: criteria } },
+      filter: ['permissions', '_uuid'],
+    });
+
+    const permissions: any = {};
+
+    for (const role of foundRoles) {
+      for (const permission of role.permissions) {
+        for (const scope of index[role._uuid]) {
+          permissions[scope] = permissions[scope] || [];
+          if (permissions[scope].indexOf(permission) === -1) {
+            permissions[scope].push(permission);
+          }
+        }
+      }
+    }
+
+    return permissions;
+  }
+
+  async getPermissionSet(roles: Array<string>): Promise<any> {
+    const permissions = [];
+    if (!roles || roles.length === 0) {
+      return [];
+    }
+
+    const foundRoles = await this.db.find('_roles', {
+      where: { _uuid: { $in: roles } },
+      filter: ['permissions', '_uuid'],
+    });
+    for (const role of foundRoles) {
+      for (const permission of role.permissions) {
+        if (permissions.indexOf(permission) === -1) {
+          permissions.push(permission);
+        }
+      }
+    }
+
+    return permissions;
+  }
+
+  //TODO: refactor so it does one $in{} query rather than multiples
+  private _getPermissionSet(roles): Promise<any> {
     const permissions = [];
 
     return roles.reduce((promise, roleName) => {
       return promise.then(() => {
-        return this.get(roleName).then(role => {
+        return this.get(roleName).then((role) => {
           logger.debug(`Got role: ${JSON.stringify(role)}`);
           for (const permission of role.permissions) {
             if (permissions.indexOf(permission) === -1) {
@@ -136,12 +196,12 @@ export class Role implements Component {
       permissions: data.permissions,
       description: data.description,
       status: data.status || 'active',
-      context: data.context
+      context: data.context,
     });
   }
 
   async init(): Promise<any> {
-    if(!this.conf) {
+    if (!this.conf) {
       logger.info('No roles to configure');
       return;
     }
@@ -152,11 +212,11 @@ export class Role implements Component {
     return roleCodes.reduce((promise, roleCode) => {
       return promise.then(() => {
         return this.get(roleCode)
-          .then(role => {
+          .then((role) => {
             logger.info(`Updating ${roleCode} role`);
             return this.update(roleCode, this.conf[roleCode]);
           })
-          .catch(err => {
+          .catch((err) => {
             if (err.error === 'not_found') {
               logger.info(`Creating ${roleCode} role`);
               const roleData = this.conf[roleCode];

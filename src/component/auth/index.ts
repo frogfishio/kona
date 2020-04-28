@@ -16,25 +16,25 @@ export class Auth implements Component {
   }
 
   async resolve(token: string) {
-    // resolve using remote AUTH provider
-    if (this.config.authenticator && this.config.authenticator.type === 'remote') {
-      return new Promise((resolve, reject) => {
-        const request = require('request');
-        request.get(
-          {
-            url: this.config.authenticator.resolve,
-            json: true,
-          },
-          (err, httpResponse, body) => {
-            if (err) {
-              return reject(body);
-            }
+    // // resolve using remote AUTH provider
+    // if (this.config.authenticator && this.config.authenticator.type === 'remote') {
+    //   return new Promise((resolve, reject) => {
+    //     const request = require('request');
+    //     request.get(
+    //       {
+    //         url: this.config.authenticator.resolve,
+    //         json: true,
+    //       },
+    //       (err, httpResponse, body) => {
+    //         if (err) {
+    //           return reject(body);
+    //         }
 
-            return resolve(body);
-          }
-        );
-      });
-    }
+    //         return resolve(body);
+    //       }
+    //     );
+    //   });
+    // }
 
     // Resolve locally
     logger.debug('Resolving token: ' + token);
@@ -75,26 +75,26 @@ export class Auth implements Component {
   }
 
   async authenticate(params, context?: string) {
-    // Authenticate using remote AUTH provider
-    if (this.config.authenticator && this.config.authenticator.type === 'remote') {
-      return new Promise((resolve, reject) => {
-        const request = require('request');
-        request.post(
-          {
-            url: this.config.authenticator.auth,
-            form: params,
-            json: true,
-          },
-          (err, httpResponse, body) => {
-            if (err) {
-              return reject(body);
-            }
+    // // Authenticate using remote AUTH provider
+    // if (this.config.authenticator && this.config.authenticator.type === 'remote') {
+    //   return new Promise((resolve, reject) => {
+    //     const request = require('request');
+    //     request.post(
+    //       {
+    //         url: this.config.authenticator.auth,
+    //         form: params,
+    //         json: true,
+    //       },
+    //       (err, httpResponse, body) => {
+    //         if (err) {
+    //           return reject(body);
+    //         }
 
-            return resolve(body);
-          }
-        );
-      });
-    }
+    //         return resolve(body);
+    //       }
+    //     );
+    //   });
+    // }
 
     // AUTH Locally
     const par = Auth.validateParams(Auth.sanitizeParams(params));

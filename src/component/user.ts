@@ -339,19 +339,41 @@ export class User implements Component {
     });
   }
 
-  async listUserRoles(userId) {
-    return this.db.find('_user_roles', { user: userId }).then((roleset) => {
-      if (!roleset) {
-        return Promise.resolve([]);
-      }
+  async getUserRoles(userId): Promise<any> {
+    const roles: Array<string> = [];
+    const scopes: any = {};
 
-      const roles = [];
-      for (let i = 0; i < roleset.length; i++) {
-        roles.push(roleset[i].role);
-      }
+    const criteria = {
+      where: { user: userId },
+      filter: ['_uuid', 'scope', 'status', 'role'],
+    };
 
-      return Promise.resolve(roles);
-    });
+    const rolemap = await this.db.find('_user_roles', criteria);
+    if (!rolemap) {
+      return [];
+    }
+
+    console.log(`rolemap --------> ${JSON.stringify(rolemap, null, 2)}`);
+
+    for (const map of rolemap) {
+      if (!map.status || map.status === 'active') {
+        if (map.scope) {
+          scopes[map.scope] = scopes[map.scope] || [];
+          if (scopes[map.scope].indexOf(map.role) === -1) {
+            scopes[map.scope].push(map.role);
+          }
+        } else {
+          if (roles.indexOf(map.role) === -1) {
+            roles.push(map.role);
+          }
+        }
+      }
+    }
+
+    if (Object.getOwnPropertyNames(scopes).length > 0) {
+      return { global: roles, scoped: scopes };
+    }
+    return roles;
   }
 
   async getUserIdByEmail(email: string, context?: string) {
@@ -391,24 +413,50 @@ export class User implements Component {
     this.engine.cache.clear('_user_permissions', userId);
   }
 
+  // private async _getUserPermissions(userId): Promise<any> {
+  //   logger.debug('Getting user permissions');
+  //   const cachedPermissions = await this.engine.cache.get('_user_permissions', userId);
+  //   if (cachedPermissions) {
+  //     logger.debug(`Returning cached permissions: ${JSON.stringify(cachedPermissions)}`);
+  //     return Promise.resolve(cachedPermissions);
+  //   }
+
+  //   logger.debug('Getting user roles');
+  //   return this.listUserRoles(userId).then((roles) => {
+  //     logger.debug(`Got roles ${JSON.stringify(roles)}`);
+  //     const rolesAPI = this.engine.role;
+  //     return rolesAPI.getPermissionSet(roles).then((permissions) => {
+  //       this.engine.cache.set('_user_permissions', userId, permissions);
+  //       logger.debug(`Roleset: ${JSON.stringify(roles)} resolves to permissions ${JSON.stringify(permissions)}`);
+  //       return Promise.resolve(permissions);
+  //     });
+  //   });
+  // }
+
   async getUserPermissions(userId): Promise<any> {
     logger.debug('Getting user permissions');
     const cachedPermissions = await this.engine.cache.get('_user_permissions', userId);
     if (cachedPermissions) {
       logger.debug(`Returning cached permissions: ${JSON.stringify(cachedPermissions)}`);
-      return Promise.resolve(cachedPermissions);
+      return cachedPermissions;
     }
 
     logger.debug('Getting user roles');
-    return this.listUserRoles(userId).then((roles) => {
-      logger.debug(`Got roles ${JSON.stringify(roles)}`);
-      const rolesAPI = this.engine.role;
-      return rolesAPI.getPermissionSet(roles).then((permissions) => {
-        this.engine.cache.set('_user_permissions', userId, permissions);
-        logger.debug(`Roleset: ${JSON.stringify(roles)} resolves to permissions ${JSON.stringify(permissions)}`);
-        return Promise.resolve(permissions);
-      });
-    });
+    const roles = await this.getUserRoles(userId);
+    logger.debug(`Got roles ${JSON.stringify(roles)}`);
+
+    let permissions: any;
+    if (Array.isArray(roles)) {
+      permissions = await this.engine.role.getPermissionSet(roles);
+    } else {
+      const map: any = roles.scoped;
+      map.global = roles.global;
+      permissions = await this.engine.role.getScopedPermissionSet(map);
+    }
+
+    this.engine.cache.set('_user_permissions', userId, permissions);
+    logger.debug(`Roleset: ${JSON.stringify(roles)} resolves to permissions ${JSON.stringify(permissions)}`);
+    return permissions;
   }
 
   private async _addRoleToUser(userId, roleIdOrCode): Promise<any> {
@@ -451,8 +499,12 @@ export class User implements Component {
   }
 
   async addRoleToUser(userId: string, roleIdOrCode: string, scope?: string, requireActivation?: boolean): Promise<any> {
-    logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
+    // shield against hacking the role code
+    if (('' + roleIdOrCode).trim().toUpperCase() === 'global') {
+      throw new ApplicationError('validation_error', 'Invalid role global', 'sys_user_artu1');
+    }
 
+    logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
     const user = await this.get(userId);
     logger.debug(`User found ${JSON.stringify(user)}`);
     const role = await this.engine.role.get(roleIdOrCode);
@@ -483,6 +535,10 @@ export class User implements Component {
       user: user._uuid,
       role: role._uuid,
     };
+
+    if (scope) {
+      data.scope = scope;
+    }
 
     data.status = 'active';
     if (requireActivation) {

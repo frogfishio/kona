@@ -10,13 +10,19 @@ export class BasicAuth {
 
   authenticate(req, permissions): Promise<any> {
     logger.debug(`Authenticating user against ${JSON.stringify(permissions)}`);
-    return this.enigne.auth.resolve(req.header('authorization')).then(user => {
+    return this.enigne.auth.resolve(req.header('authorization')).then((user) => {
       if (!permissions || permissions.length === 0) {
         return Promise.resolve(user);
       }
 
       let count = 0;
-      const userPermissions = user.permissions || [];
+      let userPermissions = user.permissions || [];
+
+      // in case of scoped permissions use globals
+      if (!Array.isArray(userPermissions) && userPermissions.global) {
+        userPermissions = userPermissions.global;
+      }
+
       for (const permission of permissions) {
         if (userPermissions.indexOf(permission) !== -1) {
           count++;
