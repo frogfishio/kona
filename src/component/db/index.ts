@@ -16,6 +16,14 @@ export interface DB extends Component {
   remove(collectionName: string, id: string): Promise<any>;
 
   /**
+   * Deletes all objects matching criteria, this is very dangerous so
+   * it is marked as separate function. This function can NOT auto purge
+   * @param collectionName
+   * @param criteria 
+   */
+  removeAll(collectionName: string, criteria: any): Promise<any>;
+
+  /**
    * Restores deleted object by UUID
    * @param collectionName
    * @param criteria
@@ -65,6 +73,15 @@ export interface DB extends Component {
    * @param values
    */
   update(collectionName: string, idOrCriteria: string | any, values: any): Promise<any>;
+
+  /**
+   * Updates all objects matching criteria. This is dangerous method and that's why it is 
+   * separated out. The return signature is also different
+   * @param collectionName 
+   * @param criteria 
+   * @param values 
+   */
+  updateAll(collectionName: string, criteria: any, values: any): Promise<any>;
 
   /**
    * Returns a count of objects with criteria

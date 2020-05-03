@@ -335,7 +335,62 @@ export class MongoDBProtocol implements DB {
     });
   }
 
+  async updateAll(collectionName: string, criteria: any, values: any): Promise<any> {
+    const collection = await this.getCollection(collectionName);
+
+    logger.debug(`Updating ${collectionName} with criteria: ${JSON.stringify(criteria)}`);
+
+    return new Promise((resolve, reject) => {
+      values._updated = Date.now();
+      collection.update(criteria, { $set: values }, { multi: true }, (err, res) => {
+        if (err) {
+          return reject(
+            new ApplicationError('database_error', `Error updating ${collectionName}`, 'sys_mdb_update1', err)
+          );
+        }
+
+        return resolve({
+          found: res.result.n,
+          modified: res.result.nModified,
+          updated: res.result.ok,
+        });
+      });
+    });
+  }
+
   async update(collectionName: string, idOrCriteria: string | any, data: any, objectTypeName?: string): Promise<any> {
+    if (typeof idOrCriteria !== 'string') {
+      logger.warn('Multi-update uwing update() method has been deprecated, use updateAll() instead');
+      return this.updateAll(collectionName, idOrCriteria, data);
+    }
+
+    const collection = await this.getCollection(collectionName);
+    return new Promise((resolve, reject) => {
+      data._updated = Date.now();
+      collection.update({ _uuid: idOrCriteria }, { $set: data }, { multi: false }, (err, res) => {
+        if (err) {
+          return reject(
+            new ApplicationError('database_error', `Error updating ${collectionName}`, 'sys_mdb_update1', err)
+          );
+        }
+
+        if (res.result.nModified === 1) {
+          return resolve({ id: idOrCriteria });
+        }
+
+        if (res.result.nModified === 0) {
+          return reject(new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_update2'));
+        }
+      });
+    });
+  }
+
+  private async _update(
+    collectionName: string,
+    idOrCriteria: string | any,
+    data: any,
+    objectTypeName?: string
+  ): Promise<any> {
     const criteria = typeof idOrCriteria === 'string' ? { _uuid: idOrCriteria } : idOrCriteria;
     const collection = await this.getCollection(collectionName);
 
@@ -382,59 +437,28 @@ export class MongoDBProtocol implements DB {
     });
   }
 
-  // async __update(collectionName: string, idOrCriteria: string | any, data: any, objectTypeName?: string): Promise<any> {
-  //   return this.get(collectionName, id, objectTypeName).then(() => {
-  //     return this.getCollection(collectionName).then(collection => {
-  //       return new Promise((resolve, reject) => {
-  //         data._updated = Date.now();
-  //         collection.update({ _uuid: id }, { $set: data }, { multi: true }, function(err, res) {
-  //           if (err) {
-  //             return reject(
-  //               new ApplicationError(
-  //                 'database_error',
-  //                 `Error updating ${objectTypeName ? objectTypeName : 'object'} in database`,
-  //                 'sys_mdb_up',
-  //                 err
-  //               )
-  //             );
-  //           }
-  //           return resolve({ id: id });
-  //         });
-  //       });
-  //     });
-  //   });
-  // }
+  async removeAll(collectionName: string, criteria: any): Promise<any> {
+    return this.updateAll(collectionName, criteria, { _deleted: true });
+  }
 
   async remove(collectionName: string, id: string): Promise<any> {
     return this.get(collectionName, id).then(() => {
       return this.getCollection(collectionName).then((collection) => {
         return new Promise((resolve, reject) => {
-          if (this.conf.purgeOnDelete === true) {
-            collection.remove({ _uuid: id }, { multi: true }, (err) => {
-              if (err) {
-                return reject(
-                  new ApplicationError('database_error', 'Error removing object from collection', 'sys_mdb_rm', err)
-                );
-              }
+          collection.update({ _uuid: id }, { $set: { _deleted: true } }, (err) => {
+            if (err) {
+              return reject(
+                new ApplicationError(
+                  'database_error',
+                  'Error removing object from collection',
+                  'sys_mdb_remove_upd',
+                  err
+                )
+              );
+            }
 
-              return resolve({ id: id });
-            });
-          } else {
-            collection.update({ _uuid: id }, { $set: { _deleted: true } }, (err) => {
-              if (err) {
-                return reject(
-                  new ApplicationError(
-                    'database_error',
-                    'Error removing object from collection',
-                    'sys_mdb_remove_upd',
-                    err
-                  )
-                );
-              }
-
-              return resolve({ id: id });
-            });
-          }
+            return resolve({ id: id });
+          });
         });
       });
     });

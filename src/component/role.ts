@@ -15,17 +15,17 @@ export class Role implements Component {
     this.db = engine.db;
   }
 
-  find(criteria, skip, limit): Promise<any> {
+  async find(criteria, skip, limit): Promise<any> {
     criteria = criteria || {};
     return this.db.find('_roles', {
       where: criteria,
       skip: skip,
       limit: limit,
-      filter: ['code', 'name', 'permissions', '_uuid'],
+      filter: ['code', 'name', 'status', 'type', 'permissions', '_uuid'],
     });
   }
 
-  get(roleIdOrCode: string): Promise<any> {
+  async get(roleIdOrCode: string): Promise<any> {
     logger.debug(`Getting role ${JSON.stringify(roleIdOrCode)}`);
     let criteria: any = {
       code: roleIdOrCode,
@@ -40,7 +40,7 @@ export class Role implements Component {
     return this.db.findOne('_roles', { where: criteria, filter: ['code', '_uuid', 'name', 'context', 'permissions'] });
   }
 
-  create(role: any): Promise<any> {
+  async create(role: any): Promise<any> {
     return Role.validateRole(role).then(() => {
       role = Role.sanitiseRole(role);
       const crit = role._uuid || role.code;
@@ -67,7 +67,7 @@ export class Role implements Component {
     });
   }
 
-  update(roleIdOrCode, role): Promise<any> {
+  async update(roleIdOrCode, role): Promise<any> {
     if (roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
       return this.db.update('_roles', roleIdOrCode, role);
     } else {
@@ -77,17 +77,19 @@ export class Role implements Component {
     }
   }
 
-  remove(roleIdOrCode): Promise<any> {
-    if (roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
-      return this.db.remove('_roles', roleIdOrCode);
-    } else {
-      return this.get(roleIdOrCode).then((foundRole) => {
-        return this.db.remove('_roles', foundRole._uuid);
-      });
+  async remove(roleIdOrCode): Promise<any> {
+    let roleId = roleIdOrCode;
+
+    if (!roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+      const foundRole = await this.get(roleIdOrCode);
+      roleId = foundRole._uuid;
     }
+
+    await this.db.removeAll('_user_roles', { role: roleId });
+    return this.db.remove('_roles', roleId);
   }
 
-  listPermissions(roleId): Promise<any> {
+  async listPermissions(roleId): Promise<any> {
     return this.get(roleId).then((role) => {
       return Promise.resolve(role.permissions || []);
     });
@@ -151,25 +153,6 @@ export class Role implements Component {
     }
 
     return permissions;
-  }
-
-  //TODO: refactor so it does one $in{} query rather than multiples
-  private _getPermissionSet(roles): Promise<any> {
-    const permissions = [];
-
-    return roles.reduce((promise, roleName) => {
-      return promise.then(() => {
-        return this.get(roleName).then((role) => {
-          logger.debug(`Got role: ${JSON.stringify(role)}`);
-          for (const permission of role.permissions) {
-            if (permissions.indexOf(permission) === -1) {
-              permissions.push(permission);
-            }
-          }
-          return Promise.resolve(permissions);
-        });
-      });
-    }, Promise.resolve());
   }
 
   private static validateRole(role): Promise<any> {
