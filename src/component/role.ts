@@ -5,6 +5,15 @@ import { DB } from './db';
 
 let logger;
 
+interface IRole {
+  code: string;
+  name: string;
+  type?: string; // none = standard, assignable = can be delegated to another user
+  status?: string; // active = active, disabled = disabled
+  permissions: Array<string>;
+  description?: string;
+}
+
 export class Role implements Component {
   private db: DB;
   private conf;
@@ -37,10 +46,15 @@ export class Role implements Component {
       };
     }
 
-    return this.db.findOne('_roles', { where: criteria, filter: ['code', '_uuid', 'name', 'context', 'permissions'] });
+    return this.db.findOne('_roles', {
+      where: criteria,
+      filter: ['code', '_uuid', 'name', 'status', 'type', 'permissions'],
+    });
   }
 
   async create(role: any): Promise<any> {
+    role.status = role.status || 'active';
+
     return Role.validateRole(role).then(() => {
       role = Role.sanitiseRole(role);
       const crit = role._uuid || role.code;
@@ -67,24 +81,13 @@ export class Role implements Component {
     });
   }
 
-  async update(roleIdOrCode, role): Promise<any> {
-    if (roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
-      return this.db.update('_roles', roleIdOrCode, role);
-    } else {
-      return this.get(roleIdOrCode).then((foundRole) => {
-        return this.db.update('_roles', foundRole._uuid, role);
-      });
-    }
+  async update(roleIdOrCode, roleData): Promise<any> {
+    const role = await this.get(roleIdOrCode);
+    return this.db.update('_roles', role._uuid, Role.sanitiseRole(roleData));
   }
 
   async remove(roleIdOrCode): Promise<any> {
-    let roleId = roleIdOrCode;
-
-    if (!roleIdOrCode.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
-      const foundRole = await this.get(roleIdOrCode);
-      roleId = foundRole._uuid;
-    }
-
+    const roleId = (await this.get(roleIdOrCode))._uuid;
     await this.db.removeAll('_user_roles', { role: roleId });
     return this.db.remove('_roles', roleId);
   }
@@ -158,10 +161,10 @@ export class Role implements Component {
   private static validateRole(role): Promise<any> {
     return new Promise((resolve, reject) => {
       if (!role) {
-        return reject(new ApplicationError('auth_error', 'Role contains no data', '5067072462'));
+        return reject(new ApplicationError('auth_error', 'Role contains no data', 'sys_role_va1'));
       }
       if (!role.name) {
-        return reject(new ApplicationError('auth_error', 'Missing role name', '5308024757'));
+        return reject(new ApplicationError('auth_error', 'Missing role name', 'sys_role_va2'));
       }
       // if (!role.code) {
       //   return reject(new ApplicationError('auth_error', 'Missing role code', 'sys_role_va3'));
@@ -171,16 +174,16 @@ export class Role implements Component {
     });
   }
 
-  private static sanitiseRole(data) {
-    return require('../util/strip')({
+  private static sanitiseRole(data): IRole {
+    const role: IRole = {
       name: data.name,
       code: data.code,
-      parent: data.parent,
+      type: data.type,
       permissions: data.permissions,
       description: data.description,
-      status: data.status || 'active',
-      context: data.context,
-    });
+      status: data.status,
+    };
+    return require('../util').strip(role);
   }
 
   async init(): Promise<any> {
