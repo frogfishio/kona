@@ -353,8 +353,6 @@ export class User implements Component {
       return [];
     }
 
-    console.log(`rolemap --------> ${JSON.stringify(rolemap, null, 2)}`);
-
     for (const map of rolemap) {
       if (!map.status || map.status === 'active') {
         if (map.scope) {
@@ -459,44 +457,44 @@ export class User implements Component {
     return permissions;
   }
 
-  private async _addRoleToUser(userId, roleIdOrCode): Promise<any> {
-    logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
+  // private async _addRoleToUser(userId, roleIdOrCode): Promise<any> {
+  //   logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
 
-    return this.get(userId).then((user) => {
-      logger.debug(`User found ${JSON.stringify(user)}`);
-      const roleAPI: Role = this.engine.role;
-      return roleAPI.get(roleIdOrCode).then((role) => {
-        logger.debug(`Role found ${JSON.stringify(role)}`);
+  //   return this.get(userId).then((user) => {
+  //     logger.debug(`User found ${JSON.stringify(user)}`);
+  //     const roleAPI: Role = this.engine.role;
+  //     return roleAPI.get(roleIdOrCode).then((role) => {
+  //       logger.debug(`Role found ${JSON.stringify(role)}`);
 
-        return this.db
-          .findOne('_user_roles', {
-            user: user._uuid,
-            role: role._uuid,
-          })
-          .then((userRole) => {
-            if (userRole) {
-              return Promise.resolve({ id: user._uuid });
-            }
-          })
-          .catch((err) => {
-            if (err.error !== 'not_found') {
-              return Promise.reject(err);
-            }
+  //       return this.db
+  //         .findOne('_user_roles', {
+  //           user: user._uuid,
+  //           role: role._uuid,
+  //         })
+  //         .then((userRole) => {
+  //           if (userRole) {
+  //             return Promise.resolve({ id: user._uuid });
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           if (err.error !== 'not_found') {
+  //             return Promise.reject(err);
+  //           }
 
-            return this.db
-              .create('_user_roles', this.engine.systemUser.account, {
-                user: user._uuid,
-                role: role._uuid,
-              })
-              .then(() => {
-                this.resetUserPermissionsCache(userId);
-                logger.debug(`Role ${roleIdOrCode} added to user ${user._uuid}`);
-                return Promise.resolve({ id: user._uuid });
-              });
-          });
-      });
-    });
-  }
+  //           return this.db
+  //             .create('_user_roles', this.engine.systemUser.account, {
+  //               user: user._uuid,
+  //               role: role._uuid,
+  //             })
+  //             .then(() => {
+  //               this.resetUserPermissionsCache(userId);
+  //               logger.debug(`Role ${roleIdOrCode} added to user ${user._uuid}`);
+  //               return Promise.resolve({ id: user._uuid });
+  //             });
+  //         });
+  //     });
+  //   });
+  // }
 
   async addRoleToUser(userId: string, roleIdOrCode: string, scope?: string, requireActivation?: boolean): Promise<any> {
     // shield against hacking the role code
@@ -506,9 +504,7 @@ export class User implements Component {
 
     logger.debug(`Adding role ${roleIdOrCode} to user ${userId}`);
     const user = await this.get(userId);
-    logger.debug(`User found ${JSON.stringify(user)}`);
     const role = await this.engine.role.get(roleIdOrCode);
-    logger.debug(`Role found ${JSON.stringify(role)}`);
 
     const criteria: any = {
       user: user._uuid,
@@ -571,30 +567,30 @@ export class User implements Component {
     return { id: userId };
   }
 
-  private async _removeRoleFromUser(userId, roleIdOrCode): Promise<any> {
-    const roleAPI: Role = this.engine.role;
+  // private async _removeRoleFromUser(userId, roleIdOrCode): Promise<any> {
+  //   const roleAPI: Role = this.engine.role;
 
-    return roleAPI.get(roleIdOrCode).then((role) => {
-      return this.db
-        .findOne('_user_roles', {
-          user: userId,
-          role: role._uuid,
-        })
-        .then((userRole) => {
-          return this.db.remove('_user_roles', userRole._uuid).then(() => {
-            this.engine.cache.clear('_user_permissions', userId);
-            return Promise.resolve({ id: userId });
-          });
-        })
-        .catch((err) => {
-          if (err.error === 'not_found') {
-            return Promise.resolve({ id: userId });
-          }
+  //   return roleAPI.get(roleIdOrCode).then((role) => {
+  //     return this.db
+  //       .findOne('_user_roles', {
+  //         user: userId,
+  //         role: role._uuid,
+  //       })
+  //       .then((userRole) => {
+  //         return this.db.remove('_user_roles', userRole._uuid).then(() => {
+  //           this.engine.cache.clear('_user_permissions', userId);
+  //           return Promise.resolve({ id: userId });
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         if (err.error === 'not_found') {
+  //           return Promise.resolve({ id: userId });
+  //         }
 
-          return Promise.reject(err);
-        });
-    });
-  }
+  //         return Promise.reject(err);
+  //       });
+  //   });
+  // }
 
   private sanitizeUser(user, skipMeta?: boolean) {
     const ret: any = {
