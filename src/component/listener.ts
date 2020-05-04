@@ -102,7 +102,7 @@ export class Listener implements Component {
             }
 
             logger.error(err);
-            return new ApplicationError('system_error', 'Internal system error', '3039645511').send(res);
+            return new ApplicationError('system_error', 'Internal system error', 'sys_core_listener1').send(res);
           });
       });
 

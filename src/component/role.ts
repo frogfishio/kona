@@ -9,7 +9,7 @@ interface IRole {
   code: string;
   name: string;
   type?: string; // none = standard, assignable = can be delegated to another user
-  status?: string; // active = active, disabled = disabled
+  status?: string; // enabled = enabled, disabled = disabled
   permissions: Array<string>;
   description?: string;
 }
@@ -78,7 +78,7 @@ export class Role implements Component {
   }
 
   async create(role: any): Promise<any> {
-    role.status = role.status || 'active';
+    role.status = role.status || 'enabled';
 
     return Role.validateRole(role).then(() => {
       role = Role.sanitiseRole(role);
