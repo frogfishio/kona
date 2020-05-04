@@ -34,6 +34,31 @@ export class Role implements Component {
     });
   }
 
+  async getUserRoles(userId: string, filter?: any): Promise<any> {
+    const userRoles = await this.db.find('_user_roles', {
+      where: { user: userId },
+    });
+
+    const roles = [];
+    for (const role of userRoles) {
+      if (!role.scope && roles.indexOf(role.role) === -1) {
+        roles.push(role.role);
+      }
+    }
+
+    if (roles.length === 0) {
+      return roles;
+    }
+
+    const criteria: any = filter || {};
+    criteria._uuid = roles;
+
+    return this.db.find('_roles', {
+      where: criteria,
+      filter: ['code', 'name', 'status', 'type', 'permissions', '_uuid'],
+    });
+  }
+
   async get(roleIdOrCode: string): Promise<any> {
     logger.debug(`Getting role ${JSON.stringify(roleIdOrCode)}`);
     let criteria: any = {
