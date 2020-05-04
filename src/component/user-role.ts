@@ -8,9 +8,9 @@ let logger;
 export interface IUserRole {
   user: string;
   role: string;
-  status: string;
-  expires?: number;
-  reference?: string;
+  status: string; // active | disabled
+  expires?: number; // timestamp of when mapping expires
+  reference?: string; // e.g. subscription that added this user-role mapping
 }
 
 export class UserRole {
@@ -24,7 +24,7 @@ export class UserRole {
 
   async create(mapping: IUserRole): Promise<any> {}
 
-  private static sanitiseRole(data) {
+  private static sanitiseUserRole(data) {
     return require('../util').strip({
       name: data.name,
       code: data.code,

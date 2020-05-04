@@ -32,6 +32,7 @@ import { Links } from './component/links';
 import { Authenticator, Authoriser } from './types';
 import { MasterData } from './component/master';
 import { Registry } from './component/registry';
+import { Limits } from './component/limits';
 
 let logger;
 // const debug = require('debug')('engine');
@@ -67,6 +68,7 @@ export class Engine {
   private _init: Init; // special case can't be accessed externally
   private _apm;
   private _registry: Registry;
+  private _limits: Limits;
 
   get id() {
     return this._instanceId;
@@ -183,6 +185,10 @@ export class Engine {
     return this._registry;
   }
 
+  get limits() {
+    return this.limits;
+  }
+
   private manageable: Array<Component> = [];
 
   constructor(private configPath: string, private override?: any) {
@@ -190,11 +196,9 @@ export class Engine {
       const apmconf = {
         serviceName: override.service || 'engine',
         secretToken: '',
-        serverUrl: override.apm // || 'http://localhost:8200' //'http://host.docker.internal:8200'
+        serverUrl: override.apm, // || 'http://localhost:8200' //'http://host.docker.internal:8200'
       };
-      console.log(
-        `Created engine with APM ${apmconf.serviceName} sending to ${apmconf.serverUrl}`
-      );
+      console.log(`Created engine with APM ${apmconf.serviceName} sending to ${apmconf.serverUrl}`);
       this._apm = require('elastic-apm-node').start(apmconf);
     }
   }
@@ -204,25 +208,18 @@ export class Engine {
     return {
       id: sysconf.user || '_system',
       account: sysconf.account || '_system',
-      permissions: sysconf.permissions || ['_system', 'admin']
+      permissions: sysconf.permissions || ['_system', 'admin'],
     };
   }
 
   async authenticate(request: any) {
     const config = this.configuration.get('auth');
     if (!config || !config.authenticator) {
-      throw new ApplicationError(
-        'system_error',
-        `Authenticator not configured`,
-        '5939792437'
-      );
+      throw new ApplicationError('system_error', `Authenticator not configured`, '5939792437');
     }
 
     try {
-      const authenticator: Authenticator = this.modules.module(
-        config.authenticator,
-        this.systemUser
-      );
+      const authenticator: Authenticator = this.modules.module(config.authenticator, this.systemUser);
       return authenticator.authenticate(request);
     } catch (err) {
       throw err;
@@ -232,18 +229,11 @@ export class Engine {
   async authorise(user: any) {
     const config = this.configuration.get('auth');
     if (!config || !config.authoriser) {
-      throw new ApplicationError(
-        'system_error',
-        `Authoriser not configured`,
-        '4143639573'
-      );
+      throw new ApplicationError('system_error', `Authoriser not configured`, '4143639573');
     }
 
     try {
-      const authoriser: Authoriser = this.modules.module(
-        config.authoriser,
-        this.systemUser
-      );
+      const authoriser: Authoriser = this.modules.module(config.authoriser, this.systemUser);
       return authoriser.authorise(user);
     } catch (err) {
       throw err;
@@ -321,6 +311,9 @@ export class Engine {
       case 'registry':
         this._registry = new Registry(this);
         return this.manage(this._registry);
+      case 'limits':
+        this._limits = new Limits(this);
+        return this.manage(this._limits);
       case 'db':
         switch (this._configuration.get('db').type) {
           case 'mongo':
@@ -329,9 +322,7 @@ export class Engine {
           default:
             throw new ApplicationError(
               'system_error',
-              `Invalid database type ${
-                this._configuration.get('data').type
-              } configured`,
+              `Invalid database type ${this._configuration.get('data').type} configured`,
               '7159960532'
             );
         }
@@ -358,9 +349,9 @@ export class Engine {
       .then(() => {
         // Init sequence is important
         logger.info(
-          `Engine initialising [${
-            this.configuration.get('system').id
-          }] with root ${this.configuration.get('system').root}`
+          `Engine initialising [${this.configuration.get('system').id}] with root ${
+            this.configuration.get('system').root
+          }`
         );
 
         // Test and create system folders where necessary
@@ -435,16 +426,14 @@ export class Engine {
 
         if (this._configuration.get('user')) {
           loadList.push('user');
+          loadList.push('limits');
         }
 
         if (this._configuration.get('responder')) {
           loadList.push('responder');
         }
 
-        if (
-          this._configuration.get('db') &&
-          this._configuration.get('scheduler')
-        ) {
+        if (this._configuration.get('db') && this._configuration.get('scheduler')) {
           loadList.push('scheduler');
         }
 
@@ -483,7 +472,7 @@ export class Engine {
               return Promise.reject('No service or run system specified');
             }
           })
-          .catch(err => {
+          .catch((err) => {
             logger.emergency(err);
             process.exit(1);
           });
