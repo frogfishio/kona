@@ -79,6 +79,7 @@ export class Role implements Component {
 
   async create(role: any): Promise<any> {
     role.status = role.status || 'enabled';
+    role.type = role.type || 'default';
 
     return Role.validateRole(role).then(() => {
       role = Role.sanitiseRole(role);
