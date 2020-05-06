@@ -34,6 +34,7 @@ import { MasterData } from './component/master';
 import { Registry } from './component/registry';
 import { Limits } from './component/limits';
 import { UserRole } from './component/user-role';
+import { Delegate } from './component/delegate';
 
 let logger;
 // const debug = require('debug')('engine');
@@ -71,6 +72,7 @@ export class Engine {
   private _registry: Registry;
   private _limits: Limits;
   private _user_role: UserRole;
+  private _delegate: Delegate;
 
   get id() {
     return this._instanceId;
@@ -193,6 +195,10 @@ export class Engine {
 
   get userRole() {
     return this._user_role;
+  }
+
+  get delegate() {
+    return this._delegate;
   }
 
   private manageable: Array<Component> = [];
@@ -320,6 +326,9 @@ export class Engine {
       case 'limits':
         this._limits = new Limits(this);
         return this.manage(this._limits);
+      case 'delegate':
+        this._delegate = new Delegate(this);
+        return this.manage(this._delegate);
       case 'user-role':
         this._user_role = new UserRole(this);
         return this.manage(this._user_role);

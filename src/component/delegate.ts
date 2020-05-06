@@ -47,15 +47,31 @@ export class Delegate implements Component {
     );
   }
 
+  /**
+   * If roles have changed it adds/removes the roles as necesary
+   * @param delegateId
+   * @param delegateData
+   */
   async update(delegateId, delegateData): Promise<any> {
     const delegate = await this.get(delegateId);
     // return this.db.update('_delegates', role._uuid, Role.sanitiseRole(roleData));
   }
 
+  /**
+   * It also removes the related roles
+   * @param delegateId
+   */
   async remove(delegateId): Promise<any> {
     const delegate = await this.get(delegateId);
     return this.db.remove('_delegates', delegate._uuid);
   }
+
+  /**
+   * Activates the delegate using the code. After it's activated, the code is removed and 
+   * status is changed. Once spent, delegate can't be reactivated
+   * @param code 
+   */
+  async activate(code: string) {}
 
   private static async validate(delegate): Promise<any> {
     return new Promise((resolve, reject) => {
