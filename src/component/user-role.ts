@@ -25,7 +25,7 @@ export class UserRole implements Component {
 
   async create(data: IUserRole): Promise<any> {
     data.status = data.status || 'enabled';
-    return this.db.create('_user_roles', this.engine.systemUser.account, UserRole.sanitise(data));
+    return this.db.create('_user_roles', this.engine.systemUser.account, await this.validate(UserRole.sanitise(data)));
   }
 
   async find(criteria: any, skip?: number, limit?: number): Promise<any> {
@@ -76,15 +76,20 @@ export class UserRole implements Component {
     logger.info('Released');
   }
 
-  private static sanitise(data) {
-    return require('../util').strip({
-      name: data.name,
-      code: data.code,
-      parent: data.parent,
-      permissions: data.permissions,
-      description: data.description,
-      status: data.status || 'active',
-      context: data.context,
-    });
+  private async validate(userRole: IUserRole): Promise<IUserRole> {
+    return userRole;
+  }
+
+  private static sanitise(data): IUserRole {
+    const userRole: IUserRole = {
+      user: data.user,
+      role: data.role,
+      status: data.status,
+      scope: data.scope,
+      expires: data.expires,
+      reference: data.reference,
+    };
+
+    return require('../util').strip(userRole);
   }
 }
