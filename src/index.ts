@@ -445,6 +445,7 @@ export class Engine {
         if (this._configuration.get('user')) {
           loadList.push('user-role');
           loadList.push('limits');
+          loadList.push('delegate');
           loadList.push('user');
         }
 
