@@ -69,7 +69,7 @@ export class UserRole implements Component {
   }
 
   async init(): Promise<any> {
-    logger.inf('Initialised');
+    logger.info('Initialised');
   }
 
   async release(): Promise<any> {
