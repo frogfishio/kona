@@ -67,9 +67,9 @@ export class Delegate implements Component {
   }
 
   /**
-   * Activates the delegate using the code. After it's activated, the code is removed and 
+   * Activates the delegate using the code. After it's activated, the code is removed and
    * status is changed. Once spent, delegate can't be reactivated
-   * @param code 
+   * @param code
    */
   async activate(code: string) {}
 
@@ -111,7 +111,7 @@ export class Delegate implements Component {
   }
 
   async init(): Promise<any> {
-    logger.inf('Initialised');
+    logger.info('Initialised');
   }
 
   async release(): Promise<any> {
