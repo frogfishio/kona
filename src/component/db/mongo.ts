@@ -86,11 +86,7 @@ export class MongoDBProtocol implements DB {
     return this.find(collectionName, { where: { _uuid: uuid }, limit: 1 }).then((result) => {
       if (!result) {
         return Promise.reject(
-          new ApplicationError(
-            'not_found',
-            `${objectTypeName ? objectTypeName : 'Object'} ${uuid} not found`,
-            'sys_mdb_ge1'
-          )
+          new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_ge1')
         );
       }
 
@@ -111,9 +107,7 @@ export class MongoDBProtocol implements DB {
     return this.find(collectionName, criteria).then((result) => {
       if (!result) {
         debug(`One not found in collection ${collectionName} criteria ${JSON.stringify(criteria)}`);
-        return Promise.reject(
-          new ApplicationError('not_found', `${objectTypeName ? objectTypeName : 'Object'} not found`, 'sys_mdb_fo1')
-        );
+        return Promise.reject(new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_fo1'));
       }
 
       if (!fileds) {
@@ -385,12 +379,7 @@ export class MongoDBProtocol implements DB {
     });
   }
 
-  private async _update(
-    collectionName: string,
-    idOrCriteria: string | any,
-    data: any,
-    objectTypeName?: string
-  ): Promise<any> {
+  private async _update(collectionName: string, idOrCriteria: string | any, data: any): Promise<any> {
     const criteria = typeof idOrCriteria === 'string' ? { _uuid: idOrCriteria } : idOrCriteria;
     const collection = await this.getCollection(collectionName);
 
@@ -401,12 +390,7 @@ export class MongoDBProtocol implements DB {
       collection.update(criteria, { $set: data }, { multi: true }, (err, res) => {
         if (err) {
           return reject(
-            new ApplicationError(
-              'database_error',
-              `Error updating ${objectTypeName ? objectTypeName : 'object'} in database`,
-              'sys_mdb_update1',
-              err
-            )
+            new ApplicationError('database_error', `Error updating ${collectionName}`, 'sys_mdb_update1', err)
           );
         }
 
@@ -418,13 +402,7 @@ export class MongoDBProtocol implements DB {
           }
 
           if (res.result.nModified === 0) {
-            return reject(
-              new ApplicationError(
-                'not_found',
-                `${objectTypeName ? objectTypeName : 'Object'} ${idOrCriteria} not found`,
-                'sys_mdb_update2'
-              )
-            );
+            return reject(new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_update2'));
           }
         }
 
