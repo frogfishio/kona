@@ -22,7 +22,7 @@ export class Delegate implements Component {
     this.db = engine.db;
   }
 
-  async find(criteria, skip, limit): Promise<any> {
+  async find(criteria: any, skip?: number, limit?: number): Promise<any> {
     criteria = criteria || {};
     return this.db.find('_delegates', {
       where: criteria,
@@ -71,7 +71,25 @@ export class Delegate implements Component {
    * status is changed. Once spent, delegate can't be reactivated
    * @param code
    */
-  async activate(code: string) {}
+  async activate(userId: string, code: string) {
+    if (!code) {
+      throw new ApplicationError('invalid_request', 'Activation code not specified', 'sys_del_act0');
+    }
+
+    const result = await this.find({ code: code });
+    if (result.length === 0) {
+      throw new ApplicationError('not_found', 'Delegate code not found', 'sys_del_act1');
+    }
+
+    const res = await result[0].roles.reduce((promise, roleCode) => {
+      return promise.then(() => {
+        return this.engine.user.addRoleToUser(userId, roleCode, result[0].scope);
+      });
+    }, Promise.resolve());
+
+    logger.debug(`Activation result: ${JSON.stringify(res)}`);
+    return this.update(result[0]._uuid, { id: userId, status: 'active', code: false });
+  }
 
   private static async validate(delegate): Promise<any> {
     return new Promise((resolve, reject) => {
