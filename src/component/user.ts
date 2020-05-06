@@ -3,7 +3,6 @@ import { Component } from './index';
 import { Engine } from '..';
 import { DB } from './db';
 import { Audit } from './audit';
-import { Role } from './role';
 
 let logger;
 
@@ -343,18 +342,19 @@ export class User implements Component {
     const roles: Array<string> = [];
     const scopes: any = {};
 
-    const criteria = {
-      where: { user: userId },
-      filter: ['_uuid', 'scope', 'status', 'role'],
-    };
-
-    const rolemap = await this.db.find('_user_roles', criteria);
+    // const criteria = {
+    //   where: { user: userId },
+    //   filter: ['_uuid', 'scope', 'status', 'role'],
+    // };
+    // const rolemap = await this.db.find('_user_roles', criteria);
+    const rolemap = await this.engine.userRole.find({ user: userId });
     if (!rolemap) {
       return [];
     }
 
     for (const map of rolemap) {
-      if (!map.status || map.status === 'active') {
+      if (!map.status || map.status === 'active' || map.status === 'enabled') {
+        //TODO: fix after migrating data
         if (map.scope) {
           scopes[map.scope] = scopes[map.scope] || [];
           if (scopes[map.scope].indexOf(map.role) === -1) {
@@ -496,7 +496,7 @@ export class User implements Component {
   //   });
   // }
 
-  async addRoleToUser(userId: string, roleIdOrCode: string, scope?: string, requireActivation?: boolean): Promise<any> {
+  async addRoleToUser(userId: string, roleIdOrCode: string, scope?: string): Promise<any> {
     // shield against hacking the role code
     if (('' + roleIdOrCode).trim().toUpperCase() === 'global') {
       throw new ApplicationError('validation_error', 'Invalid role global', 'sys_user_artu1');
@@ -516,9 +516,8 @@ export class User implements Component {
     }
 
     try {
-      const userRole = await this.db.findOne('_user_roles', criteria);
-
-      if (userRole) {
+      // const userRole = await this.db.findOne('_user_roles', criteria);
+      if ((await this.engine.userRole.find(criteria)).length > 0) {
         return { id: user._uuid };
       }
     } catch (err) {
@@ -536,13 +535,14 @@ export class User implements Component {
       data.scope = scope;
     }
 
-    data.status = 'active';
-    if (requireActivation) {
-      data.status = 'activating';
-      data.activation = require('shortid').generate();
-    }
+    data.status = 'enabled';
+    // if (requireActivation) {
+    //   data.status = 'activating';
+    //   data.activation = require('shortid').generate();
+    // }
 
-    const result = await this.db.create('_user_roles', this.engine.systemUser.account, data);
+    // const result = await this.db.create('_user_roles', this.engine.systemUser.account, data);
+    await this.engine.userRole.create(data);
 
     this.resetUserPermissionsCache(userId);
     logger.debug(`Role ${role.name} (Scope: ${scope ? scope : 'global'}) added to user ${user._uuid}`);
@@ -551,17 +551,19 @@ export class User implements Component {
 
   async removeRoleFromUser(userId: string, roleIdOrCode: string, scope?: string): Promise<any> {
     const role = await this.engine.role.get(roleIdOrCode);
-    const criteria: any = {
-      user: userId,
-      role: role._uuid,
-    };
+    // const criteria: any = {
+    //   user: userId,
+    //   role: role._uuid,
+    // };
 
-    if (scope) {
-      criteria.scope = scope;
-    }
+    // if (scope) {
+    //   criteria.scope = scope;
+    // }
 
-    const userRole = await this.db.findOne('_user_roles', criteria);
-    await this.db.remove('_user_roles', userRole._uuid);
+    // const userRole = await this.db.findOne('_user_roles', criteria);
+    // await this.db.remove('_user_roles', userRole._uuid);
+
+    await this.engine.userRole.removeAll(userId, role._uuid, scope);
 
     this.engine.cache.clear('_user_permissions', userId);
     return { id: userId };

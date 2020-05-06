@@ -35,9 +35,10 @@ export class Role implements Component {
   }
 
   async getUserRoles(userId: string, filter?: any): Promise<any> {
-    const userRoles = await this.db.find('_user_roles', {
-      where: { user: userId },
-    });
+    // const userRoles = await this.db.find('_user_roles', {
+    //   where: { user: userId },
+    // });
+    const userRoles = await this.engine.userRole.find({ user: userId });
 
     const roles = [];
     for (const role of userRoles) {
@@ -114,7 +115,8 @@ export class Role implements Component {
 
   async remove(roleIdOrCode): Promise<any> {
     const roleId = (await this.get(roleIdOrCode))._uuid;
-    await this.db.removeAll('_user_roles', { role: roleId });
+    // await this.db.removeAll('_user_roles', { role: roleId });
+    await this.engine.userRole.removeAll(null, roleId);
     return this.db.remove('_roles', roleId);
   }
 

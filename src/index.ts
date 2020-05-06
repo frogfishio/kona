@@ -33,6 +33,7 @@ import { Authenticator, Authoriser } from './types';
 import { MasterData } from './component/master';
 import { Registry } from './component/registry';
 import { Limits } from './component/limits';
+import { UserRole } from './component/user-role';
 
 let logger;
 // const debug = require('debug')('engine');
@@ -69,6 +70,7 @@ export class Engine {
   private _apm;
   private _registry: Registry;
   private _limits: Limits;
+  private _user_role: UserRole;
 
   get id() {
     return this._instanceId;
@@ -186,7 +188,11 @@ export class Engine {
   }
 
   get limits() {
-    return this.limits;
+    return this._limits;
+  }
+
+  get userRole() {
+    return this._user_role;
   }
 
   private manageable: Array<Component> = [];
@@ -314,6 +320,9 @@ export class Engine {
       case 'limits':
         this._limits = new Limits(this);
         return this.manage(this._limits);
+      case 'user-role':
+        this._user_role = new UserRole(this);
+        return this.manage(this._user_role);
       case 'db':
         switch (this._configuration.get('db').type) {
           case 'mongo':
@@ -426,6 +435,7 @@ export class Engine {
 
         if (this._configuration.get('user')) {
           loadList.push('user');
+          loadList.push('user-role');
           loadList.push('limits');
         }
 
