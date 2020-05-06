@@ -94,7 +94,7 @@ export class Delegate implements Component {
         return reject(new ApplicationError('validation_error', 'Missing delegate roles', 'sys_del_va6'));
       }
 
-      resolve();
+      resolve(delegate);
     });
   }
 
