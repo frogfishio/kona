@@ -69,7 +69,6 @@ export class User implements Component {
       logger.debug('Creating user: ' + JSON.stringify(userData));
 
       const result = await this.db.create('_users', this.engine.systemUser.account, userData);
-      logger.debug(`Adding role to user ${result.id}`);
       this.audit.create(result.id, 'user', 'User created');
 
       if (userData.status === 'locked') {
@@ -78,6 +77,7 @@ export class User implements Component {
         this.engine.events.signal('user_created', { user: result.id });
       }
 
+      logger.debug(`Adding role to user ${result.id}`);
       const rres = await this.addRoleToUser(result.id, this._conf.defaultRole);
       this.audit.create(result.id, 'user', `Added ${this._conf.defaultRole} to user ${result.id}`);
       return rres;
@@ -348,9 +348,6 @@ export class User implements Component {
     // };
     // const rolemap = await this.db.find('_user_roles', criteria);
     const rolemap = await this.engine.userRole.find({ user: userId });
-    if (!rolemap) {
-      return [];
-    }
 
     for (const map of rolemap) {
       if (!map.status || map.status === 'active' || map.status === 'enabled') {
@@ -515,15 +512,8 @@ export class User implements Component {
       criteria.scope = scope;
     }
 
-    try {
-      // const userRole = await this.db.findOne('_user_roles', criteria);
-      if ((await this.engine.userRole.find(criteria)).length > 0) {
-        return { id: user._uuid };
-      }
-    } catch (err) {
-      if (err.error !== 'not_found') {
-        throw err;
-      }
+    if ((await this.engine.userRole.find(criteria)).length > 0) {
+      return { id: user._uuid };
     }
 
     const data: any = {

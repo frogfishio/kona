@@ -118,7 +118,7 @@ export class Auth implements Component {
 
     await userAPI.resetUserPermissionsCache(user._uuid);
     user.permissions = (await userAPI.getUserPermissions(user._uuid)) || [];
-    user.contexts = (await accountAPI.get(user.account)).contexts || [];
+    // user.contexts = (await accountAPI.get(user.account)).contexts || [];
 
     return this.engine.token.create(user, this.config.bearerTokenTTL);
   }

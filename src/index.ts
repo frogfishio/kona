@@ -434,9 +434,9 @@ export class Engine {
         loadList.push('roles');
 
         if (this._configuration.get('user')) {
-          loadList.push('user');
           loadList.push('user-role');
           loadList.push('limits');
+          loadList.push('user');
         }
 
         if (this._configuration.get('responder')) {
