@@ -62,7 +62,48 @@ export class Delegate implements Component {
    */
   async update(delegateId, delegateData): Promise<any> {
     const delegate = await this.get(delegateId);
-    return this.db.update('_delegates', delegate._uuid, Delegate.sanitisee(delegateData));
+    delegateData = Delegate.sanitisee(delegateData);
+
+    if (delegate.status === 'active' && delegateData.roles) {
+      const remove: Array<string> = [];
+      const add: Array<string> = [];
+      for (const role of delegateData.roles) {
+        if (delegate.roles.indexOf(role) === -1) {
+          add.push(role);
+        }
+      }
+
+      for (const role of delegate.roles) {
+        if (delegateData.roles.indexOf(role) === -1) {
+          remove.push(role);
+        }
+      }
+
+      if (remove.length > 0) {
+        await this.removeDelegateRoles(delegate.id, remove, delegate.scope);
+      }
+      if (add.length > 0) {
+        await this.addDelegateRoles(delegate.id, add, delegate.scope);
+      }
+    }
+
+    return this.db.update('_delegates', delegate._uuid, delegateData);
+  }
+
+  private async addDelegateRoles(userId: string, roles: Array<string>, scope: string) {
+    return roles.reduce((promise, roleCode) => {
+      return promise.then(() => {
+        return this.engine.user.addRoleToUser(userId, roleCode, scope);
+      });
+    }, Promise.resolve());
+  }
+
+  private async removeDelegateRoles(userId: string, roles: Array<string>, scope?: string) {
+    return roles.reduce((promise, roleCode) => {
+      return promise.then(() => {
+        return this.engine.user.removeRoleFromUser(userId, roleCode, scope);
+      });
+    }, Promise.resolve());
   }
 
   /**
@@ -71,6 +112,9 @@ export class Delegate implements Component {
    */
   async remove(delegateId): Promise<any> {
     const delegate = await this.get(delegateId);
+    if (delegate.status === 'active' && delegate.roles.length > 0) {
+      await this.removeDelegateRoles(delegate.id, delegate.roles, delegate.scope);
+    }
     return this.db.remove('_delegates', delegate._uuid);
   }
 
@@ -89,11 +133,13 @@ export class Delegate implements Component {
       throw new ApplicationError('not_found', 'Delegate code not found', 'sys_del_act1');
     }
 
-    const res = await result[0].roles.reduce((promise, roleCode) => {
-      return promise.then(() => {
-        return this.engine.user.addRoleToUser(userId, roleCode, result[0].scope);
-      });
-    }, Promise.resolve());
+    // const res = await result[0].roles.reduce((promise, roleCode) => {
+    //   return promise.then(() => {
+    //     return this.engine.user.addRoleToUser(userId, roleCode, result[0].scope);
+    //   });
+    // }, Promise.resolve());
+
+    const res = await this.addDelegateRoles(userId, result[0].roles, result[0].scope);
 
     logger.debug(`Activation result: ${JSON.stringify(res)}`);
     return this.update(result[0]._uuid, { id: userId, status: 'active', code: false });
