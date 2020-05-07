@@ -32,9 +32,17 @@ export class Delegate implements Component {
   }
 
   async get(delegateId: string): Promise<any> {
-    return this.db.findOne('_delegates', {
-      where: { _uuid: delegateId },
-    });
+    try {
+      return this.db.findOne('_delegates', {
+        where: { _uuid: delegateId },
+      });
+    } catch (err) {
+      if (err.error === 'not_found') {
+        throw new ApplicationError('not_found', `Delegate ${delegateId} not found`, 'sys_del_get1');
+      }
+
+      throw err;
+    }
   }
 
   async create(delegateData: any): Promise<any> {
@@ -54,7 +62,7 @@ export class Delegate implements Component {
    */
   async update(delegateId, delegateData): Promise<any> {
     const delegate = await this.get(delegateId);
-    // return this.db.update('_delegates', role._uuid, Role.sanitiseRole(roleData));
+    return this.db.update('_delegates', delegate._uuid, Delegate.sanitisee(delegateData));
   }
 
   /**
