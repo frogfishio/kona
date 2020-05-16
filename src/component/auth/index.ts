@@ -113,7 +113,15 @@ export class Auth implements Component {
     const userAPI: User = this.engine.user;
     const accountAPI: Account = this.engine.account;
 
-    const user = await userAPI.getUserByEmailAndPassword(params.email, params.password, context);
+    let user;
+    try {
+      user = await userAPI.getUserByEmailAndPassword(params.email, params.password, context);
+    } catch (err) {
+      if (err.error === 'not_found') {
+        throw new ApplicationError('not_found', 'User with supplied credentials not found', 'sys_ayuth_p1');
+      }
+      throw err;
+    }
     this.engine.audit.create(user._uuid, 'auth', `User authenticated by password`);
 
     await userAPI.resetUserPermissionsCache(user._uuid);
