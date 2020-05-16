@@ -33,7 +33,13 @@ export class BasicAuth {
         return Promise.resolve(user);
       }
 
-      return Promise.reject(new ApplicationError('insufficient_scope', 'Insufficient privilege', 'system_auth_basic'));
+      return Promise.reject(
+        new ApplicationError(
+          'insufficient_scope',
+          `Missing required permission ${JSON.stringify(permissions)}`,
+          'system_auth_basic'
+        )
+      );
     });
   }
 }
