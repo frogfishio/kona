@@ -33,12 +33,15 @@ export class BasicAuth {
         return Promise.resolve(user);
       }
 
+      let pstr = '';
+      for (let i = 0; i < permissions.length; i++) {
+        pstr += permissions[i];
+        if (i < permissions.length - 1) {
+          pstr += ',';
+        }
+      }
       return Promise.reject(
-        new ApplicationError(
-          'insufficient_scope',
-          `Missing required permission ${JSON.stringify(permissions)}`,
-          'system_auth_basic'
-        )
+        new ApplicationError('insufficient_scope', `Missing required permission ${pstr}`, 'system_auth_basic')
       );
     });
   }
