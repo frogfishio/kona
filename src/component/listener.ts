@@ -47,7 +47,7 @@ export class Listener implements Component {
 
       express.use(
         bodyParser.urlencoded({
-          extended: true
+          extended: true,
         })
       );
 
@@ -91,12 +91,19 @@ export class Listener implements Component {
         }
 
         this.authorise(req, route)
-          .then(authenticatedUser => {
+          .then((authenticatedUser) => {
             logger.debug(`Got authenticated user: ${JSON.stringify(authenticatedUser)}`);
             const handler = new route.handler(this.system, authenticatedUser);
+            if (!handler) {
+              return new ApplicationError(
+                'system_error',
+                `Missing ${req.path} service handler for ${method} method`,
+                'sys_core_listener0'
+              ).send(res);
+            }
             return handler[method](req, res);
           })
-          .catch(err => {
+          .catch((err) => {
             if (err.error) {
               return err.send(res);
             }
