@@ -46,6 +46,7 @@ export class Delegate implements Component {
   }
 
   async create(delegateData: any): Promise<any> {
+    //TODO: check whether role is transferrable and throw exception if not, check whther user actually owns that role
     delegateData.code = require('uuid').v4();
     delegateData.status = 'pending';
     return this.db.create(
