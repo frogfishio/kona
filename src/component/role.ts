@@ -206,8 +206,10 @@ export class Role implements Component {
   }
 
   async links(roleId: string, filter?: any) {
-    filter = filter || {};
     const role = await this.get(roleId);
+
+    filter = filter || {};
+    filter.type = 'role';
     filter.from = role._uuid;
     this.engine.links.find(filter);
   }

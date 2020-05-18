@@ -16,7 +16,7 @@ export class Links implements Component {
   private stats = {};
 
   constructor(private engine: Engine) {
-    logger = engine.log.log('stats');
+    logger = engine.log.log('engine:links');
   }
 
   async add(type: string, from: string, to: string, scope?: string, meta?: any): Promise<any> {
@@ -43,7 +43,7 @@ export class Links implements Component {
     criteria = criteria || {};
     return this.engine.db.find('_links', {
       where: criteria,
-      filter: ['_uuid', 'type', 'from', 'to'],
+      filter: ['_uuid', 'type', 'from', 'to', 'scope', 'meta'],
     });
   }
 
