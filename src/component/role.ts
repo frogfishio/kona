@@ -211,7 +211,7 @@ export class Role implements Component {
     filter = filter || {};
     filter.type = 'role';
     filter.from = role._uuid;
-    this.engine.links.find(filter);
+    return this.engine.links.find(filter);
   }
 
   // -----------------------

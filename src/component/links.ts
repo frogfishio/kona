@@ -39,7 +39,7 @@ export class Links implements Component {
     this.engine.db.removeAll('_links', criteria);
   }
 
-  async find(criteria?: any): Promise<ILink> {
+  async find(criteria?: any): Promise<Array<ILink>> {
     criteria = criteria || {};
     return this.engine.db.find('_links', {
       where: criteria,
