@@ -115,7 +115,7 @@ export class Role implements Component {
 
   async remove(roleIdOrCode): Promise<any> {
     const roleId = (await this.get(roleIdOrCode))._uuid;
-    await this.engine.links.removeAll(roleId);
+    await this.engine.links.remove('role', roleId);
     await this.engine.userRole.removeAll(null, roleId);
     return this.db.remove('_roles', roleId);
   }
@@ -191,23 +191,13 @@ export class Role implements Component {
     return this.engine.links.add('role', role._uuid, to, scope, meta);
   }
 
-  async unlink(roleId: string, to: string) {
+  async unlink(roleId: string, to?: string, scope?: string) {
     const role = await this.get(roleId);
-    return this.engine.links.remove('role', role._uuid, to);
-  }
-
-  async unlinkAll(roleId: string, scope?: string) {
-    const role = await this.get(roleId);
-    const criteria: any = {};
-    if (scope) {
-      criteria.scope = scope;
-    }
-    return this.engine.links.removeAll(role._uuid, criteria);
+    return this.engine.links.remove('role', role._uuid, to, scope);
   }
 
   async links(roleId: string, filter?: any) {
     const role = await this.get(roleId);
-
     filter = filter || {};
     filter.type = 'role';
     filter.from = role._uuid;

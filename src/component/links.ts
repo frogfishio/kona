@@ -25,18 +25,10 @@ export class Links implements Component {
   }
 
   async remove(type: string, from: string, to?: string, scope?: string): Promise<any> {
-    const criteria: ILink = { type: type, from: from, to: to, scope: scope };
-    const link = await this.engine.db.findOne('_links', require('../util').strip(criteria));
-    return this.engine.db.remove('_links', link._uuid);
-  }
-
-  async removeAll(from: string, criteria?: any): Promise<any> {
-    if (!from) {
-      throw new ApplicationError('invalid_request', 'Filter owner must be specified', 'sys_link_rma1');
-    }
-    criteria = criteria || {};
-    criteria.from = from;
-    this.engine.db.removeAll('_links', criteria);
+    return this.engine.db.removeAll(
+      '_links',
+      require('../util').strip({ type: type, from: from, to: to, scope: scope })
+    );
   }
 
   async find(criteria?: any): Promise<Array<ILink>> {

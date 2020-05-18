@@ -464,7 +464,7 @@ export class User implements Component {
   async removeRoleFromUser(userId: string, roleIdOrCode: string, scope?: string): Promise<any> {
     const role = await this.engine.role.get(roleIdOrCode);
     await this.engine.userRole.removeAll(userId, role._uuid, scope);
-    await this.engine.role.unlinkAll(role._uuid, userId);
+    await this.engine.role.unlink(role._uuid, userId);
     this.engine.cache.clear('_user_permissions', userId);
     return { id: userId };
   }
