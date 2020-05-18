@@ -8,8 +8,10 @@ interface ILink {
   type: string;
   from: string;
   to: string;
+  scope?: string;
   meta?: any;
 }
+
 export class Links implements Component {
   private stats = {};
 
@@ -17,15 +19,15 @@ export class Links implements Component {
     logger = engine.log.log('stats');
   }
 
-  async add(type: string, from: string, to: string, meta?: any): Promise<any> {
+  async add(type: string, from: string, to: string, scope?: string, meta?: any): Promise<any> {
     const link: ILink = { type: type, from: from, to: to, meta: meta };
-    return this.engine.db.create('_links', this.engine.systemUser.account, require('../util').strip(link));
+    return this.engine.db.create('_links', this.engine.systemUser.account, this.sanitise(link));
   }
 
-  async remove(type: string, from: string, to: string): Promise<any> {
-    return this.engine.db.findOne('_links', { type: type, from: from, to: to }).then((found) => {
-      return this.engine.db.remove('_links', found._uuid);
-    });
+  async remove(type: string, from: string, to?: string, scope?: string): Promise<any> {
+    const criteria: ILink = { type: type, from: from, to: to, scope: scope };
+    const link = await this.engine.db.findOne('_links', require('../util').strip(criteria));
+    return this.engine.db.remove('_links', link._uuid);
   }
 
   async removeAll(from: string, criteria?: any): Promise<any> {
@@ -42,6 +44,16 @@ export class Links implements Component {
     return this.engine.db.find('_links', {
       where: criteria,
       filter: ['_uuid', 'type', 'from', 'to'],
+    });
+  }
+
+  private sanitise(data) {
+    return require('../util').strip({
+      type: data.type,
+      from: data.from,
+      to: data.to,
+      scope: data.scope,
+      meta: data.meta,
     });
   }
 

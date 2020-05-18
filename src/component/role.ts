@@ -186,14 +186,23 @@ export class Role implements Component {
     return permissions;
   }
 
-  async link(roleId: string, to: string, meta?: any) {
+  async link(roleId: string, to: string, scope?: string, meta?: any) {
     const role = await this.get(roleId);
-    return this.engine.links.add('role', role._uuid, to, meta);
+    return this.engine.links.add('role', role._uuid, to, scope, meta);
   }
 
   async unlink(roleId: string, to: string) {
     const role = await this.get(roleId);
     return this.engine.links.remove('role', role._uuid, to);
+  }
+
+  async unlinkAll(roleId: string, scope?: string) {
+    const role = await this.get(roleId);
+    const criteria: any = {};
+    if (scope) {
+      criteria.scope = scope;
+    }
+    return this.engine.links.removeAll(role._uuid, criteria);
   }
 
   async links(roleId: string, filter?: any) {
