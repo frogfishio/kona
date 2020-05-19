@@ -14,6 +14,16 @@ interface IRole {
   description?: string;
 }
 
+export enum RoleType {
+  Default = 'default',
+  Assignable = 'assignable',
+}
+
+export enum RoleStatus {
+  Enabled = 'enabled',
+  Disabled = 'disabled',
+}
+
 export class Role implements Component {
   private db: DB;
   private conf;

@@ -338,7 +338,7 @@ export class User implements Component {
     });
   }
 
-  async getUserRoles(userId): Promise<any> {
+  async getUserRoles(userId: string): Promise<any> {
     const roles: Array<string> = [];
     const scopes: any = {};
     const rolemap = await this.engine.userRole.find({ user: userId });
