@@ -442,12 +442,12 @@ export class Engine {
 
         loadList.push('roles');
         loadList.push('user-role');
+        loadList.push('delegate');
 
-        if (this._configuration.get('user')) {
-          loadList.push('limits');
-          loadList.push('delegate');
-          loadList.push('user');
-        }
+        // if (this._configuration.get('user')) {
+        loadList.push('limits');
+        loadList.push('user');
+        // }
 
         if (this._configuration.get('responder')) {
           loadList.push('responder');

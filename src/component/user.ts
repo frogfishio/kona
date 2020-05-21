@@ -13,7 +13,7 @@ export class User implements Component {
 
   constructor(private engine: Engine) {
     logger = engine.log.log('engine:user');
-    this._conf = this.engine.configuration.get('user');
+    this._conf = this.engine.configuration.get('user') || {};
     this.audit = this.engine.audit;
     this.db = engine.db;
   }
@@ -624,9 +624,13 @@ export class User implements Component {
     }
   }
 
-  init(): Promise<any> {
+  async init(): Promise<any> {
+    if (!this._conf.users) {
+      return;
+    }
+
     logger.info('Initialising base users');
-    const users = this._conf.users || [];
+    const users = this._conf.users;
 
     return users.reduce((promise, user) => {
       return promise.then(() => {
