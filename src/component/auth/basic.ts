@@ -20,7 +20,8 @@ export class BasicAuth {
 
       // in case of scoped permissions use globals
       if (!Array.isArray(userPermissions) && userPermissions.global) {
-        userPermissions = userPermissions.global;
+        // userPermissions = userPermissions.global;
+        userPermissions = this.merge(userPermissions);
       }
 
       for (const permission of permissions) {
@@ -44,5 +45,13 @@ export class BasicAuth {
         new ApplicationError('insufficient_scope', `Missing required permission ${pstr}`, 'system_auth_basic')
       );
     });
+  }
+
+  private merge(data): Array<string> {
+    let ret = [];
+    for (const name of Object.getOwnPropertyNames(data)) {
+      ret = ret.concat(data[name]);
+    }
+    return ret;
   }
 }

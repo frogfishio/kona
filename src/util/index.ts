@@ -83,3 +83,46 @@ module.exports.error = (err, res, logger?, trace?: string) => {
     trace || 'sys_int_erhelper'
   ).send(res);
 };
+
+module.exports.scope = (user: any, permission: string) => {
+  if (!user || !permission) {
+    throw new ApplicationError(
+      'validation_error',
+      'User and desired permission must be scpecified to get scope',
+      'sys_util_scope1'
+    );
+  }
+
+  if (Array.isArray(user.permissions)) {
+    if (user.permissions.includes(permission)) {
+      return user.account;
+    }
+    throw new ApplicationError('insufficient_scope', `Missing ${permission} permission`, 'sys_util_scope2');
+  }
+
+  const scope = [];
+  if (user.permissions.global.includes(permission)) {
+    scope.push(user.account);
+  }
+
+  for (const sc of Object.getOwnPropertyNames(user.permissions)) {
+    if (sc !== 'global') {
+      if (user.permissions[sc].includes(permission)) {
+        scope.push(sc);
+      }
+    }
+  }
+
+  if (scope.length === 0) {
+    throw new ApplicationError(
+      'insufficient_scope',
+      `All contexts missing ${permission} permission`,
+      'sys_util_scope2'
+    );
+  }
+
+  if (scope.length === 1) {
+    return scope[0];
+  }
+  return scope;
+};
