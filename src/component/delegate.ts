@@ -134,13 +134,14 @@ export class Delegate implements Component {
       throw new ApplicationError('not_found', 'Delegate code not found', 'sys_del_act1');
     }
 
+    const user = await this.engine.user.get(userId);
     // const res = await result[0].roles.reduce((promise, roleCode) => {
     //   return promise.then(() => {
     //     return this.engine.user.addRoleToUser(userId, roleCode, result[0].scope);
     //   });
     // }, Promise.resolve());
 
-    const res = await this.addDelegateRoles(userId, result[0].roles, result[0].scope);
+    const res = await this.addDelegateRoles(user._uuid, result[0].roles, result[0].scope);
 
     logger.debug(`Activation result: ${JSON.stringify(res)}`);
     return this.update(result[0]._uuid, { id: userId, status: 'active', code: false });
