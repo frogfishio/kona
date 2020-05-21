@@ -1,3 +1,5 @@
+import { ApplicationError } from '../error';
+
 module.exports.toBolean = (data): boolean => {
   if (data === true || data === false) {
     return data;
@@ -62,4 +64,22 @@ module.exports.clone = (source, exclude?, merge?) => {
   }
 
   return clone;
+};
+
+module.exports.error = (err, res, logger?, trace?: string) => {
+  if (err.send) {
+    return err.send(res);
+  }
+
+  if (logger) {
+    logger.error(err);
+  } else {
+    console.error(err);
+  }
+  console.error(err);
+  new ApplicationError(
+    'sytem_error',
+    'Internal system error ocurred, administrator was notified',
+    trace || 'sys_int_erhelper'
+  ).send(res);
 };
