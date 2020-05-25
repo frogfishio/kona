@@ -123,14 +123,14 @@ class Log {
     this.logger.logger.error(
       `********** ERROR ***********\n${this.logger.trace}${
         message.error_description ? this.contextify(`${JSON.stringify(message, null, 2)} ${message.stack}`) : message
-      }\n********** ERROR END *********`
+      }\n${message.stack ? message.stack + '\n' : ''}********** ERROR END *********`
     );
   }
   emergency(message) {
     this.logger.logger.emergency(
       `********** EMERGENCY ***********\n${this.logger.trace}${
         message.error ? this.contextify(`${JSON.stringify(message, null, 2)}`) : message
-      }\n********** EMERGENCY END *********`
+      }\n${message.stack ? message.stack + '\n' : ''}********** EMERGENCY END *********`
     );
   }
 
