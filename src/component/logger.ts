@@ -39,7 +39,7 @@ export class Logger {
       info: 6,
       warn: 4,
       error: 3,
-      emergency: 0
+      emergency: 0,
     });
 
     winston.addColors({
@@ -47,43 +47,36 @@ export class Logger {
       info: 'green',
       warn: 'yellow',
       error: 'red',
-      emergency: 'magenta'
+      emergency: 'magenta',
     });
 
     winston.remove(winston.transports.Console);
     winston.add(winston.transports.Console, {
       colorize: colorize,
-      stderrLevels: ['error', 'fatal']
+      stderrLevels: ['error', 'fatal'],
     });
 
     winston.level = this.conf.log ? this.conf.log.level || 'info' : 'info';
 
-    winston.info(
-      'Logging starting in ' + (this.conf.level || 'info') + ' mode'
-    );
+    winston.info('Logging starting in ' + (this.conf.log.level || 'info') + ' mode');
 
-  if (this.conf.log) {
+    if (this.conf.log) {
       if (this.conf.log.file) {
         winston.add(winston.transports.File, {
           filename: this.conf.log.file, //|| '/var/log/engine.log',
           timestamp: true,
-          maxsize: 1000000
+          maxsize: 1000000,
         });
-        winston.info(
-          'Logs will be written to ' +
-            (this.conf.log.file || '/var/log/engine.log')
-        );
+        winston.info('Logs will be written to ' + (this.conf.log.file || '/var/log/engine.log'));
       }
 
       if (this.conf.log.host && this.conf.log.port) {
         winston.add(winston.transports.Papertrail, {
           host: this.conf.log.host,
           port: this.conf.log.port,
-          program: conf.name || this.conf.id
+          program: conf.name || this.conf.id,
         });
-      }
-      if (this.conf.log.host && this.conf.log.port) {
-        winston.info('Remote logging enabled');
+        winston.info(`Remote logging enabled to ${this.conf.log.host}:${this.conf.log.port}`);
       }
     }
 
@@ -97,11 +90,7 @@ export class Logger {
 
 class Log {
   private _debug;
-  constructor(
-    private logger: Logger,
-    private context: string,
-    private conf: any
-  ) {
+  constructor(private logger: Logger, private context: string, private conf: any) {
     this.conf = conf || {};
     this.conf.component = context;
     this.context = context.toLowerCase();
@@ -110,48 +99,37 @@ class Log {
 
   debug(message) {
     const msg = this.contextify(
-      message.error_description
-        ? message.error_description + ' (' + message.trace + ')'
-        : message
+      message.error_description ? message.error_description + ' (' + message.trace + ')' : message
     );
     this.logger.trace = msg;
     this._debug(msg);
   }
   info(message) {
     const msg = this.contextify(
-      message.error_description
-        ? message.error_description + ' (' + message.trace + ')'
-        : message
+      message.error_description ? message.error_description + ' (' + message.trace + ')' : message
     );
     this.logger.trace = msg;
     this.logger.logger.info(msg);
   }
   warn(message) {
     const msg = this.contextify(
-      message.error_description
-        ? message.error_description + ' (' + message.trace + ')'
-        : message
+      message.error_description ? message.error_description + ' (' + message.trace + ')' : message
     );
 
+    this.logger.trace = msg;
     this.logger.logger.warn(msg);
   }
   error(message) {
     this.logger.logger.error(
       `********** ERROR ***********\n${this.logger.trace}${
-        message.error_description
-          ? this.contextify(
-              `${JSON.stringify(message, null, 2)} ${message.stack}`
-            )
-          : message
+        message.error_description ? this.contextify(`${JSON.stringify(message, null, 2)} ${message.stack}`) : message
       }\n********** ERROR END *********`
     );
   }
   emergency(message) {
     this.logger.logger.emergency(
       `********** EMERGENCY ***********\n${this.logger.trace}${
-        message.error
-          ? this.contextify(`${JSON.stringify(message, null, 2)}`)
-          : message
+        message.error ? this.contextify(`${JSON.stringify(message, null, 2)}`) : message
       }\n********** EMERGENCY END *********`
     );
   }
