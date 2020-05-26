@@ -71,6 +71,8 @@ export class Configuration implements Component {
 
     conf.system.id = process.env.ENGINE_SYSTEM_ID ? process.env.ENGINE_SYSTEM_ID : conf.system.id;
 
+    conf.system.name = process.env.ENGINE_SYSTEM_NAME ? process.env.ENGINE_SYSTEM_NAME : conf.system.name;
+
     conf.system.salt = process.env.ENGINE_SYSTEM_SALT ? process.env.ENGINE_SYSTEM_SALT : conf.system.salt;
 
     conf.system.listen = process.env.ENGINE_SYSTEM_LISTEN ? process.env.ENGINE_SYSTEM_LISTEN : conf.system.listen;
@@ -89,8 +91,19 @@ export class Configuration implements Component {
 
     conf.system.live = process.env.ENGINE_SYSTEM_LIVE ? process.env.ENGINE_SYSTEM_LIVE : conf.system.live;
 
+    // Logging
+
+    conf.system.log = conf.system.log || {};
+    conf.system.log.host = process.env.ENGINE_SYSTEM_LOG_HOST
+      ? process.env.ENGINE_SYSTEM_LOG_HOST
+      : conf.system.log.host;
+
+    conf.system.log.port = process.env.ENGINE_SYSTEM_LOG_PORT
+      ? parseInt(process.env.ENGINE_SYSTEM_LOG_PORT)
+      : conf.system.log.port;
+
     if (process.env.ENGINE_SYSTEM_DEBUG) {
-      conf.log.level = 'debug';
+      conf.system.log.level = 'debug';
     }
 
     if (conf.memory) {
