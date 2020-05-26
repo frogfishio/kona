@@ -423,7 +423,7 @@ export class User implements Component {
 
   async addRoleToUser(userId: string, roleIdOrCode: string, scope?: string): Promise<any> {
     // shield against hacking the role code
-    if (('' + roleIdOrCode).trim().toUpperCase() === 'global') {
+    if (('' + roleIdOrCode).trim().toLowerCase() === 'global') {
       throw new ApplicationError('validation_error', 'Invalid role global', 'sys_user_artu1');
     }
 
