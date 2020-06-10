@@ -24,11 +24,21 @@ export class Session implements Component {
     });
   }
 
+  async create(data: any): Promise<any> {
+    data = require('../util/strip')(data);
+    const now = Date.now();
+    data._uuid = require('uuid').v4();
+    data._created = now;
+    data._updated = now;
+    data._expires = new Date(Date.now() + SESSION_EXPIRY);
+
+    this.memory.set(`session-${data._uuid}`, data, SESSION_EXPIRY);
+    return this.encrypt(data._uuid).then(id => Promise.resolve({ id: id }));
+  }
+
   async set(sessionId: string, data: any): Promise<any> {
     if (!sessionId) {
-      data = this.create(data);
-      this.memory.set(`session-${data._uuid}`, data, SESSION_EXPIRY);
-      return this.encrypt(data._uuid).then(id => Promise.resolve({ id: id }));
+      return Promise.reject(new ApplicationError('not_found', `Session ${sessionId} not found`, 'sys_sess_set'));
     }
 
     return this.decrypt(sessionId).then(id => {
@@ -46,16 +56,16 @@ export class Session implements Component {
     });
   }
 
-  private create(data: any) {
-    data = require('../util/strip')(data);
-    const now = Date.now();
-    data._uuid = require('uuid').v4();
-    data._created = now;
-    data._updated = now;
-    data._expires = new Date(Date.now() + SESSION_EXPIRY);
+  // private create(data: any) {
+  //   data = require('../util/strip')(data);
+  //   const now = Date.now();
+  //   data._uuid = require('uuid').v4();
+  //   data._created = now;
+  //   data._updated = now;
+  //   data._expires = new Date(Date.now() + SESSION_EXPIRY);
 
-    return data;
-  }
+  //   return data;
+  // }
 
   async init(): Promise<any> {
     logger.info('Initialised');

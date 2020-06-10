@@ -2,6 +2,20 @@
  * Created by eldiablo on 18/05/2016.
  */
 
+export enum KonaError {
+  VALIDATION_ERROR = 'validation_error',
+  INVALID_REQUEST = 'invalid_request',
+  ALREADY_EXISTS = 'already_exists',
+  INVALID_TOKEN = 'invalid_token',
+  AUTH_ERROR = 'auth_error',
+  INSUFFICIENT_SCOPE = 'insufficient_scope',
+  NOT_FOUND = 'not_found',
+  UNSUPPORTED_METHOD = 'unsupported_method',
+  SYSTEM_ERROR = 'system_error',
+  CONFIGURATION_ERROR = 'configuration_error',
+  SERVICE_ERROR = 'service_error',
+}
+
 const codes = {
   validation_error: 400, // When passed data fails validation
   invalid_request: 400,
@@ -28,7 +42,7 @@ const codes = {
   data_error: 409,
   system_error: 500, // Internal deep error
   configuration_error: 500, // Configuration error
-  service_error: 502 // When calling a remote service fails
+  service_error: 502, // When calling a remote service fails
 };
 
 export class ApplicationError {
@@ -52,7 +66,7 @@ export class ApplicationError {
     res.status(this.code).json({
       error: this.error,
       error_description: this.error_description,
-      trace: this.trace
+      trace: this.trace,
     });
   }
 }
