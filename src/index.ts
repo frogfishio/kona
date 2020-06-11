@@ -461,7 +461,7 @@ export class Engine {
         //   this.loadList.push('email');
         // }
 
-        this.register('email', null, true);
+        this.register('email');
 
         // if (this._configuration.get('templates')) {
         //   this.loadList.push('templates');
