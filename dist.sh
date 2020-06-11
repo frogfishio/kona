@@ -4,5 +4,5 @@ npm run dist
 cd build/release; npm publish --access public; cd ../..
 
 if test -f "../update.sh"; then
-    source ../update.sh
+    cd ..; source ./update.sh; cd kona
 fi
