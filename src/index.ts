@@ -1,5 +1,5 @@
 import { Component } from './component/index';
-import { ApplicationError } from './error';
+import { ApplicationError, KonaError } from './error';
 
 // Components
 import { Configuration } from './component/configuration';
@@ -353,8 +353,10 @@ export class Engine {
     }
   }
 
+  private loadList = [];
+
   async init(): Promise<any> {
-    let loadList = [];
+    // let this.loadList = [];
 
     this._configuration = new Configuration(this.configPath, this.override);
     return this._configuration
@@ -391,78 +393,118 @@ export class Engine {
 
         // Initialse system components
         logger.info('Initialising system components');
-        loadList = ['events', 'heartbeat'];
+        // this.loadList = ['events', 'heartbeat'];
+        this.register('events', null, true);
+        this.register('heartbeat', null, true);
 
-        if (this._configuration.get('memory')) {
-          loadList.push('memory');
-          loadList.push('manifest');
-          // Load session if memory is enabled
-          // TODO: add session config
-          loadList.push('session');
-        }
+        // if (this._configuration.get('memory')) {
+        //   this.loadList.push('memory');
+        //   this.loadList.push('manifest');
+        //   // Load session if memory is enabled
+        //   // TODO: add session config
+        //   this.loadList.push('session');
+        // }
 
-        if (this._configuration.get('cache')) {
-          loadList.push('cache');
-        }
+        this.register('memory');
+        this.register('manifest', 'memory');
+        this.register('session', 'memory');
 
-        if (this._configuration.get('registry')) {
-          loadList.push('registry');
-        }
+        // if (this._configuration.get('cache')) {
+        //   this.loadList.push('cache');
+        // }
 
-        if (this._configuration.get('db')) {
-          loadList.push('db');
-          loadList.push('audit');
-          loadList.push('links');
-          loadList.push('account');
-          loadList.push('master');
-        }
+        this.register('cache');
 
-        loadList.push('modules');
+        // if (this._configuration.get('registry')) {
+        //   this.loadList.push('registry');
+        // }
+
+        this.register('registry');
+
+        // if (this._configuration.get('db')) {
+        //   this.loadList.push('db');
+        //   this.loadList.push('audit');
+        //   this.loadList.push('links');
+        //   this.loadList.push('account');
+        //   this.loadList.push('master');
+        // }
+
+        this.register('db');
+        this.register('audit', 'db');
+        this.register('links', 'db');
+        this.register('account', 'db');
+        this.register('master'), 'db';
+
+        // this.loadList.push('modules');
+        this.register('modules', null, true);
 
         // if (this._configuration.get('file')) {
         // }
-        loadList.push('file');
+        // this.loadList.push('file');
+        this.register('file', 'db');
 
-        if (this._configuration.get('connectors')) {
-          loadList.push('connector');
-        }
-
-        if (this._configuration.get('auth')) {
-          loadList.push('auth');
-          loadList.push('token');
-        }
-
-        if (this._configuration.get('email')) {
-          loadList.push('email');
-        }
-
-        if (this._configuration.get('templates')) {
-          loadList.push('templates');
-        }
-
-        loadList.push('roles');
-        loadList.push('user-role');
-        loadList.push('delegate');
-
-        // if (this._configuration.get('user')) {
-        loadList.push('limits');
-        loadList.push('user');
+        // if (this._configuration.get('connectors')) {
+        //   this.loadList.push('connector');
         // }
 
-        if (this._configuration.get('responder')) {
-          loadList.push('responder');
-        }
+        this.register('connector');
 
-        if (this._configuration.get('db') && this._configuration.get('scheduler')) {
-          loadList.push('scheduler');
-        }
+        // if (this._configuration.get('auth')) {
+        //   this.loadList.push('auth');
+        //   this.loadList.push('token');
+        // }
 
-        // after all is loaded run external init
-        if (this._configuration.get('init')) {
-          loadList.push('init');
-        }
+        this.register('auth');
+        this.register('token', 'auth', true);
 
-        return loadList
+        // if (this._configuration.get('email')) {
+        //   this.loadList.push('email');
+        // }
+
+        this.register('email', null, true);
+
+        // if (this._configuration.get('templates')) {
+        //   this.loadList.push('templates');
+        // }
+
+        this.register('templates');
+
+        // this.loadList.push('roles');
+        // this.loadList.push('user-role');
+        // this.loadList.push('delegate');
+
+        this.register('roles', 'db');
+        this.register('user-roles', 'db', true);
+        this.register('delegate', 'db', true);
+
+        // // if (this._configuration.get('user')) {
+        // this.loadList.push('limits');
+        // this.loadList.push('user');
+        // // }
+
+        this.register('limits', 'db', true);
+        this.register('user', 'db');
+
+        // if (this._configuration.get('responder')) {
+        //   this.loadList.push('responder');
+        // }
+
+        this.register('responder');
+
+        // if (this._configuration.get('db') && this._configuration.get('scheduler')) {
+        //   this.loadList.push('scheduler');
+        // }
+
+        this.register('scheduler', 'db');
+
+        // // after all is loaded run external init
+        // if (this._configuration.get('init')) {
+        //   this.loadList.push('init');
+        // }
+
+        this.register('init');
+
+        return this.loadList
           .reduce((promise, componentName) => {
             return promise.then(() => {
               logger.info(`Loading ${componentName}`);
@@ -492,7 +534,7 @@ export class Engine {
               return Promise.reject('No service or run system specified');
             }
           })
-          .catch((err) => {
+          .catch(err => {
             logger.emergency(err);
             process.exit(1);
           });
@@ -512,5 +554,33 @@ export class Engine {
   manage(component: Component): Component {
     this.manageable.push(component);
     return component;
+  }
+
+  private register(commponentName: string, dependencies?: Array<string> | string, ignoreCheck?: boolean) {
+    if (ignoreCheck || this._configuration.get(commponentName)) {
+      if (dependencies) {
+        if (Array.isArray(dependencies)) {
+          for (const dep of dependencies) {
+            if (!this._configuration.get(dep)) {
+              throw new ApplicationError(
+                KonaError.SYSTEM_ERROR,
+                `Missing dependency ${dependencies} to register ${commponentName}`,
+                'sys_core_reg2'
+              );
+            }
+          }
+        } else {
+          if (!this._configuration.get(dependencies)) {
+            throw new ApplicationError(
+              KonaError.SYSTEM_ERROR,
+              `Missing dependency ${dependencies} to register ${commponentName}`,
+              'sys_core_reg2'
+            );
+          }
+        }
+      }
+
+      this.loadList.push(commponentName);
+    }
   }
 }
