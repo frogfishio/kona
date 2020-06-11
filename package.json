@@ -1,6 +1,6 @@
 {
   "name": "@frogfish/kona",
-  "version": "2.2.11",
+  "version": "2.2.12",
   "description": "Frogfish Kona",
   "main": "index.js",
   "scripts": {
