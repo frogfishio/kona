@@ -562,6 +562,9 @@ export class Engine {
         if (Array.isArray(dependencies)) {
           for (const dep of dependencies) {
             if (!this._configuration.get(dep)) {
+              if (ignoreCheck) {
+                return;
+              }
               throw new ApplicationError(
                 KonaError.SYSTEM_ERROR,
                 `Missing dependency ${dependencies} to register ${commponentName}`,
@@ -571,6 +574,9 @@ export class Engine {
           }
         } else {
           if (!this._configuration.get(dependencies)) {
+            if (ignoreCheck) {
+              return;
+            }
             throw new ApplicationError(
               KonaError.SYSTEM_ERROR,
               `Missing dependency ${dependencies} to register ${commponentName}`,
