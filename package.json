@@ -49,6 +49,7 @@
     "chai-like": "^1.1.1",
     "chai-things": "^0.2.0",
     "del": "^3.0.0",
+    "gulp": "^4.0.2",
     "gulp-typescript": "^5.0.1",
     "typescript": "^2.9.2"
   }
