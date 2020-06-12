@@ -19,7 +19,13 @@ export class Heartbeat implements Component {
       this.count++;
       for (const subscriber of this.subscribers) {
         if (this.count % subscriber.interval === 0) {
-          subscriber.subscriber(subscriber.id);
+          if (subscriber.sleep) {
+            if (subscriber.sleep <= Date.now()) {
+              subscriber.subscriber(subscriber.id);
+            }
+          } else {
+            subscriber.subscriber(subscriber.id);
+          }
         }
       }
     }, 1000);

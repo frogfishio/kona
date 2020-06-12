@@ -12,9 +12,21 @@ describe('Role service', function () {
     engine = await require('./helper').engine();
   });
 
-  describe('Connector', function () {
-    it('should return data', async () => {
-      expect(engine).to.exist;
+  describe('Connector', () => {
+    it('should return data', done => {
+      setTimeout(function () {
+        const conn = engine.connector.connector('scarlet');
+        conn
+          .get('/content/find')
+          .then(result => {
+            console.log(JSON.stringify(result, null, 2));
+            return done();
+          })
+          .catch(err => {
+            console.error(err);
+            // return done();
+          });
+      }, 500);
     });
   });
 });

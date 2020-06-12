@@ -55,6 +55,13 @@ export class HttpConnector {
     method = method.toUpperCase();
     const req = this.inflate(this._conf, method, verb, data, headers, raw);
 
+    if (this._auth) {
+      const token = this._auth.token();
+      if (token) {
+        req.headers['Authorization'] = token;
+      }
+    }
+
     if (this._conf.agent) {
       switch (this._conf.agent.type) {
         case 'https_over_http_tunnel':

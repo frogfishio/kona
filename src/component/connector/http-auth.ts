@@ -13,6 +13,14 @@ export class HttpConnectorAuth {
     this.init();
   }
 
+  token() {
+    if (this._authorization) {
+      return `Bearer ${this._authorization.access_token}`;
+    }
+
+    return null;
+  }
+
   private async init() {
     switch (this._conf.type) {
       case 'oauth':
@@ -27,23 +35,36 @@ export class HttpConnectorAuth {
   }
 
   private async watch(authoriser) {
-    // if (!this._token) {
-    //   this._token = await waiter();
-    //   logger.debug(`-----------result----------\n${JSON.stringify(this._token, null, 2)}`);
-    // }
+    let sleep = 0;
 
-    this._engine.heartbeat.subscribe('auth-watcher', 5, subId => {
-      logger.debug(`Ding ding !!!! (${subId})`);
-      authoriser()
-        .then(token => {
-          token.ttl = Date.now() + token.expires_in * 1000;
-          this._authorization = token;
-          logger.debug(`Authorisation ${JSON.stringify(this._authorization, null, 2)}`);
-        })
-        .catch(err => {
-          logger.error(err);
-        });
-    });
+    try {
+      const tk = await authoriser();
+      tk.ttl = Date.now() + tk.expires_in * 1000;
+      this._authorization = tk;
+      sleep = tk.expires_in - 60; // minute grace
+      logger.debug(`Authorisation ${JSON.stringify(this._authorization, null, 2)}`);
+    } catch (err) {
+      logger.error(err);
+    }
+
+    this._engine.heartbeat.subscribe(
+      'auth-watcher',
+      10 /* seconds retry */,
+      subId => {
+        logger.debug(`Ding ding !!!! (${subId})`);
+        authoriser()
+          .then(token => {
+            token.ttl = Date.now() + token.expires_in * 1000;
+            this._authorization = token;
+            logger.debug(`Authorisation ${JSON.stringify(this._authorization, null, 2)}`);
+            this._engine.heartbeat.sleep(subId, token.expires_in - 60); // refresh token a minute before expiry
+          })
+          .catch(err => {
+            logger.error(err);
+          });
+      } /* seleep for */,
+      sleep
+    );
   }
 
   private async authPassword() {
