@@ -524,10 +524,10 @@ export class Engine {
                 });
               } else {
                 const runner = require(this.configuration.get('system').run);
-                logger.info(`Runner: ${runner}`);
+                logger.info(`Running: ${this.configuration.get('system').run}`);
                 runner.default(this).then(() => {
                   logger.info('Runner completed');
-                  process.exit(0);
+                  // process.exit(0);
                 });
               }
             } else {
