@@ -14,7 +14,7 @@ describe('Role service', function () {
 
   describe('Connector', function () {
     it('should return data', async () => {
-      expect(engine.connector).to.exist();
+      expect(engine).to.exist;
     });
   });
 });

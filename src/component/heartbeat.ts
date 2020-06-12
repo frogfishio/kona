@@ -19,7 +19,7 @@ export class Heartbeat implements Component {
       this.count++;
       for (const subscriber of this.subscribers) {
         if (this.count % subscriber.interval === 0) {
-          subscriber.subscriber();
+          subscriber.subscriber(subscriber.id);
         }
       }
     }, 1000);
@@ -34,11 +34,31 @@ export class Heartbeat implements Component {
     return Promise.resolve();
   }
 
-  subscribe(name: string, interval: number, subscriber) {
+  subscribe(name: string, interval: number, subscriber, sleep?: number) {
     this.subscribers.push({
+      id: require('uuid').v4(),
       name: name,
       subscriber: subscriber,
-      interval: interval
+      interval: interval,
+      sleep: sleep ? Date.now() + sleep * 1000 : 0,
     });
+  }
+
+  unsubscribe(subscriberId) {
+    for (let i = 0; i < this.subscribers.length; i++) {
+      if (this.subscribers[i].id === subscriberId) {
+        this.subscribers.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  sleep(subscriberId, seconds: number) {
+    for (const sub of this.subscribers) {
+      if (sub.id === subscriberId) {
+        sub.sleep = Date.now() + seconds * 1000;
+        break;
+      }
+    }
   }
 }

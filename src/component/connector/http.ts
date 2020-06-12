@@ -1,15 +1,20 @@
 import { ApplicationError } from '../../error';
 import { Engine } from '../..';
+import { HttpConnectorAuth } from './http-auth';
 
 let logger;
 
 export class HttpConnector {
   private _request = require('request');
   private _reveal = require('../../util/reveal');
+  private _auth;
 
   constructor(private _engine: Engine, private _conf: any) {
     logger = _engine.log.log('engine:connector:http');
     logger.debug(`HTTP connector with URL ${this._conf.url} created`);
+    if (_conf.auth) {
+      this._auth = new HttpConnectorAuth(_engine, _conf.auth);
+    }
   }
 
   async get(verb: string, query?: any, headers?: any, force?: boolean): Promise<any> {
@@ -48,8 +53,7 @@ export class HttpConnector {
 
   private async request(method: string, verb, data?: any, headers?: any, raw?: boolean): Promise<any> {
     method = method.toUpperCase();
-
-    let req = this.inflate(this._conf, method, verb, data, headers, raw);
+    const req = this.inflate(this._conf, method, verb, data, headers, raw);
 
     if (this._conf.agent) {
       switch (this._conf.agent.type) {
@@ -128,7 +132,7 @@ export class HttpConnector {
       req.proxy = {
         host: this._reveal(conf.proxy.host),
         port: this._reveal(conf.proxy.port),
-        proxyAuth: this._reveal(conf.proxy.auth)
+        proxyAuth: this._reveal(conf.proxy.auth),
       };
     }
 
@@ -149,6 +153,6 @@ export class HttpConnector {
   }
 }
 
-export default function(engine: Engine, conf) {
+export default function (engine: Engine, conf) {
   return new HttpConnector(engine, conf);
 }

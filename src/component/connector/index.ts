@@ -13,7 +13,7 @@ export class Connector implements Component {
 
   constructor(private _engine: Engine) {
     logger = _engine.log.log('engine:connector');
-    this._conf = _engine.configuration.get('connectors');
+    this._conf = _engine.configuration.get('connector');
   }
 
   connector(name: string) {
