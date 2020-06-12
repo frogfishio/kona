@@ -14,7 +14,7 @@
     "engine": "engine.js"
   },
   "author": "el'diablo <eldiablolives@live.com>",
-  "license": "Apache-2.0",
+  "license": "LGPL3",
   "dependencies": {
     "aws-sdk": "^2.695.0",
     "body-parser": "^1.19.0",
@@ -23,11 +23,8 @@
     "cookie-session": "^2.0.0-rc.1",
     "cors": "^2.8.5",
     "debug": "^4.1.1",
-    "elastic-apm-node": "^1.14.5",
     "express": "^4.17.1",
-    "extend": "^3.0.2",
     "file-type": "^7.7.1",
-    "gulp": "^4.0.2",
     "handlebars": "^4.7.6",
     "ioredis": "^4.17.3",
     "js-yaml": "^3.14.0",
@@ -39,10 +36,8 @@
     "ms": "^2.1.2",
     "request": "^2.88.2",
     "shortid": "^2.2.14",
-    "soap": "^0.30.0",
     "superagent": "^5.2.2",
     "swagger-parser": "^4.1.0",
-    "tunnel": "0.0.6",
     "uuid": "^3.4.0",
     "winston": "^2.4.4",
     "winston-papertrail": "^1.0.5"

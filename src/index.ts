@@ -53,7 +53,7 @@ export class Engine {
   private _events: Events;
   private _cache: Cache;
   private _token: Token;
-  private _connectors: Connector;
+  private _connector: Connector;
   private _files: Files;
   private _responder: Responder;
   private _email: Email;
@@ -129,8 +129,8 @@ export class Engine {
     return this._token;
   }
 
-  get connectors(): Connector {
-    return this._connectors;
+  get connector(): Connector {
+    return this._connector;
   }
 
   get responder(): Responder {
@@ -288,8 +288,8 @@ export class Engine {
         this._manifest = new Manifest(this);
         return this.manage(this._manifest);
       case 'connector':
-        this._connectors = new Connector(this);
-        return this.manage(this._connectors);
+        this._connector = new Connector(this);
+        return this.manage(this._connector);
       case 'roles':
         this._role = new Role(this);
         return this.manage(this._role);
