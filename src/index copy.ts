@@ -356,176 +356,189 @@ export class Engine {
   private loadList = [];
 
   async init(): Promise<any> {
-    // Init core logger
+    // let this.loadList = [];
+
     this._configuration = new Configuration(this.configPath, this.override);
-    await this._configuration.init();
+    return this._configuration
+      .init()
+      .then(() => {
+        this._log = new Logger(this._configuration.get('system'));
+        logger = this._log.log('engine');
+        return Promise.resolve();
+      })
+      .then(() => {
+        // Init sequence is important
+        logger.info(
+          `Engine initialising [${this.configuration.get('system').id}] with root ${
+            this.configuration.get('system').root
+          }`
+        );
 
-    this._log = new Logger(this._configuration.get('system'));
-    logger = this._log.log('engine');
+        // Test and create system folders where necessary
+        if (this.configuration.get('system').folders) {
+          const fs = require('fs');
+          logger.info('Checking folders');
 
-    // Init sequence is important
-    logger.info(
-      `Engine initialising [${this.configuration.get('system').id}] with root ${this.configuration.get('system').root}`
-    );
-
-    // Test and create system folders where necessary
-    if (this.configuration.get('system').folders) {
-      const fs = require('fs');
-      logger.info('Checking folders');
-
-      for (const folder of this.configuration.get('system').folders) {
-        let partial = '';
-        for (const part of folder.split('/')) {
-          partial += '/' + part;
-          if (!fs.existsSync(partial)) {
-            fs.mkdirSync(partial);
+          for (const folder of this.configuration.get('system').folders) {
+            let partial = '';
+            for (const part of folder.split('/')) {
+              partial += '/' + part;
+              if (!fs.existsSync(partial)) {
+                fs.mkdirSync(partial);
+              }
+            }
+            logger.info(`Folder ${folder} OK`);
           }
         }
-        logger.info(`Folder ${folder} OK`);
-      }
-    }
 
-    // Initialse system components
-    logger.info('Initialising system components');
+        // Initialse system components
+        logger.info('Initialising system components');
+        // this.loadList = ['events', 'heartbeat'];
+        this.register('events', null, true);
+        this.register('heartbeat', null, true);
 
-    // this.loadList = ['events', 'heartbeat'];
-    this.register('events', null, true);
-    this.register('heartbeat', null, true);
+        // if (this._configuration.get('memory')) {
+        //   this.loadList.push('memory');
+        //   this.loadList.push('manifest');
+        //   // Load session if memory is enabled
+        //   // TODO: add session config
+        //   this.loadList.push('session');
+        // }
 
-    // if (this._configuration.get('memory')) {
-    //   this.loadList.push('memory');
-    //   this.loadList.push('manifest');
-    //   // Load session if memory is enabled
-    //   // TODO: add session config
-    //   this.loadList.push('session');
-    // }
+        this.register('memory');
+        this.register('manifest', 'memory');
+        this.register('session', 'memory');
 
-    this.register('memory');
-    this.register('manifest', 'memory');
-    this.register('session', 'memory');
+        // if (this._configuration.get('cache')) {
+        //   this.loadList.push('cache');
+        // }
 
-    // if (this._configuration.get('cache')) {
-    //   this.loadList.push('cache');
-    // }
+        this.register('cache');
 
-    this.register('cache');
+        // if (this._configuration.get('registry')) {
+        //   this.loadList.push('registry');
+        // }
 
-    // if (this._configuration.get('registry')) {
-    //   this.loadList.push('registry');
-    // }
+        this.register('registry');
 
-    this.register('registry');
+        // if (this._configuration.get('db')) {
+        //   this.loadList.push('db');
+        //   this.loadList.push('audit');
+        //   this.loadList.push('links');
+        //   this.loadList.push('account');
+        //   this.loadList.push('master');
+        // }
 
-    // if (this._configuration.get('db')) {
-    //   this.loadList.push('db');
-    //   this.loadList.push('audit');
-    //   this.loadList.push('links');
-    //   this.loadList.push('account');
-    //   this.loadList.push('master');
-    // }
+        this.register('db');
+        this.register('audit', 'db');
+        this.register('links', 'db');
+        this.register('account', 'db');
+        this.register('master'), 'db';
 
-    this.register('db');
-    this.register('audit', 'db');
-    this.register('links', 'db');
-    this.register('account', 'db');
-    this.register('master'), 'db';
+        // this.loadList.push('modules');
+        this.register('modules', null, true);
 
-    // this.loadList.push('modules');
-    this.register('modules', null, true);
+        // if (this._configuration.get('file')) {
+        // }
+        // this.loadList.push('file');
+        this.register('file', 'db');
 
-    // if (this._configuration.get('file')) {
-    // }
-    // this.loadList.push('file');
-    this.register('file', 'db');
+        // if (this._configuration.get('connectors')) {
+        //   this.loadList.push('connector');
+        // }
 
-    // if (this._configuration.get('connectors')) {
-    //   this.loadList.push('connector');
-    // }
+        this.register('connector');
 
-    this.register('connector');
+        // if (this._configuration.get('auth')) {
+        //   this.loadList.push('auth');
+        //   this.loadList.push('token');
+        // }
 
-    // if (this._configuration.get('auth')) {
-    //   this.loadList.push('auth');
-    //   this.loadList.push('token');
-    // }
+        this.register('auth');
+        this.register('token', 'auth', true);
 
-    this.register('auth');
-    this.register('token', 'auth', true);
+        // if (this._configuration.get('email')) {
+        //   this.loadList.push('email');
+        // }
 
-    // if (this._configuration.get('email')) {
-    //   this.loadList.push('email');
-    // }
+        this.register('email');
 
-    this.register('email');
+        // if (this._configuration.get('templates')) {
+        //   this.loadList.push('templates');
+        // }
 
-    // if (this._configuration.get('templates')) {
-    //   this.loadList.push('templates');
-    // }
+        this.register('templates');
 
-    this.register('templates');
+        // this.loadList.push('roles');
+        // this.loadList.push('user-role');
+        // this.loadList.push('delegate');
 
-    // this.loadList.push('roles');
-    // this.loadList.push('user-role');
-    // this.loadList.push('delegate');
+        this.register('roles', 'db');
+        this.register('user-roles', 'db', true);
+        this.register('delegate', 'db', true);
 
-    this.register('roles', 'db');
-    this.register('user-roles', 'db', true);
-    this.register('delegate', 'db', true);
+        // // if (this._configuration.get('user')) {
+        // this.loadList.push('limits');
+        // this.loadList.push('user');
+        // // }
 
-    // // if (this._configuration.get('user')) {
-    // this.loadList.push('limits');
-    // this.loadList.push('user');
-    // // }
+        this.register('limits', 'db', true);
+        this.register('user', 'db');
 
-    this.register('limits', 'db', true);
-    this.register('user', 'db');
+        // if (this._configuration.get('responder')) {
+        //   this.loadList.push('responder');
+        // }
 
-    // if (this._configuration.get('responder')) {
-    //   this.loadList.push('responder');
-    // }
+        this.register('responder');
 
-    this.register('responder');
+        // if (this._configuration.get('db') && this._configuration.get('scheduler')) {
+        //   this.loadList.push('scheduler');
+        // }
 
-    // if (this._configuration.get('db') && this._configuration.get('scheduler')) {
-    //   this.loadList.push('scheduler');
-    // }
+        this.register('scheduler', 'db');
 
-    this.register('scheduler', 'db');
+        // // after all is loaded run external init
+        // if (this._configuration.get('init')) {
+        //   this.loadList.push('init');
+        // }
 
-    // // after all is loaded run external init
-    // if (this._configuration.get('init')) {
-    //   this.loadList.push('init');
-    // }
+        this.register('init');
 
-    this.register('init');
-
-    await this.loadList.reduce((promise, componentName) => {
-      return promise.then(() => {
-        logger.info(`Loading ${componentName}`);
-        return this.load(componentName).init();
+        return this.loadList
+          .reduce((promise, componentName) => {
+            return promise.then(() => {
+              logger.info(`Loading ${componentName}`);
+              return this.load(componentName).init();
+            });
+          }, Promise.resolve())
+          .then(() => {
+            if (this.services || this.registry) {
+              this._listener = new Listener(this);
+              this.manage(this._listener);
+              return this._listener.init();
+            } else if (this.configuration.get('system').run) {
+              if (this.configuration.get('system').run === 'forever') {
+                logger.info('Running forever');
+                return new Promise((resolve, reject) => {
+                  setInterval(() => {}, 60000);
+                });
+              } else {
+                const runner = require(this.configuration.get('system').run);
+                logger.info(`Running: ${this.configuration.get('system').run}`);
+                return runner.default(this).then(() => {
+                  logger.info('Runner completed');
+                  // process.exit(0);
+                });
+              }
+            } else {
+              return Promise.reject('No service or run system specified');
+            }
+          })
+          .catch(err => {
+            logger.emergency(err);
+            process.exit(1);
+          });
       });
-    }, Promise.resolve());
-
-    try {
-      // Check if any services are registered
-      if (this.services || this.registry) {
-        this._listener = new Listener(this);
-        this.manage(this._listener);
-        await this._listener.init();
-
-        // check if we have runner configuration
-      } else if (this.configuration.get('system').run) {
-        const runner = require(this.configuration.get('system').run);
-        logger.info(`Running: ${this.configuration.get('system').run}`);
-        await runner.default(this);
-        logger.info('Runner executed');
-      } else {
-        return Promise.reject('No service or run system specified');
-      }
-    } catch (err) {
-      logger.emergency(err);
-      process.exit(1);
-    }
   }
 
   release() {
