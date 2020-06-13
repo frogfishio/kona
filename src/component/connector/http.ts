@@ -88,6 +88,7 @@ export class HttpConnector {
 
           if (response.statusCode !== 200) {
             const error = this.error(body);
+
             if (typeof error === 'string') {
               return reject(new ApplicationError('invalid_request', JSON.stringify(body), 'sys_conn_http_req2'));
             }
@@ -112,7 +113,7 @@ export class HttpConnector {
     });
   }
 
-  private async error(data) {
+  private error(data) {
     if (typeof data === 'string') {
       try {
         const err = JSON.parse(data);
@@ -122,10 +123,10 @@ export class HttpConnector {
       }
     }
 
-    if (data.error && data.description) {
-      const err = this.error(data.description);
+    if (data.error && data.error_description) {
+      const err = this.error(data.error_description);
       if (typeof err === 'string') {
-        data.description = err;
+        data.error_description = err;
       }
 
       return data;

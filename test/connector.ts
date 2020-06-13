@@ -13,20 +13,20 @@ describe('Role service', function () {
   });
 
   describe('Connector', () => {
-    it('should return data', done => {
-      setTimeout(function () {
-        const conn = engine.connector.connector('scarlet');
-        conn
-          .get('/content/find')
-          .then(result => {
-            console.log(JSON.stringify(result, null, 2));
-            return done();
-          })
-          .catch(err => {
-            console.error(err);
-            // return done();
-          });
+    it('should wait for a bit', done => {
+      setTimeout(() => {
+        done();
       }, 500);
+    });
+
+    it('should return data', async () => {
+      const conn = engine.connector.connector('scarlet');
+      const result = await conn.get('/content/find');
+      console.log(
+        `*********************************************************\n${JSON.stringify(
+          result
+        )}\n*********************************************************`
+      );
     });
   });
 });
