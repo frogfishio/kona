@@ -53,6 +53,7 @@ export class HttpConnector {
 
   private async request(method: string, verb, data?: any, headers?: any, raw?: boolean): Promise<any> {
     method = method.toUpperCase();
+    headers = headers || {};
     const req = this.inflate(this._conf, method, verb, data, headers, raw);
 
     if (this._auth) {
@@ -76,13 +77,15 @@ export class HttpConnector {
     delete clone.pfx;
     logger.debug(JSON.stringify(clone, null, 2));
 
+    // is it going to be raw data mode
+    if (this._conf.raw === true) {
+      return this._request(req);
+    }
+
     return new Promise((resolve, reject) => {
       this._request(req, (err, response, body) => {
         try {
           if (err) {
-            logger.debug(err);
-            logger.debug(body);
-            logger.debug(response);
             return reject(new ApplicationError('invalid_request', JSON.stringify(err), 'sys_conn_http_req1'));
           }
 
