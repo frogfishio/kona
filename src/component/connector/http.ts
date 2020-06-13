@@ -87,14 +87,18 @@ export class HttpConnector {
           }
 
           if (response.statusCode !== 200) {
-            try {
-              if (response.error && response.error_description) {
-                return reject(new ApplicationError(response.error, response.error_description, response.trace));
-              }
+            const error = this.error(body);
+            if (typeof error === 'string') {
               return reject(new ApplicationError('invalid_request', JSON.stringify(body), 'sys_conn_http_req2'));
-            } catch (err) {
-              return reject(new ApplicationError('invalid_request', JSON.stringify(body), 'sys_conn_http_req3'));
             }
+
+            if (error.error && error.error_description) {
+              return reject(
+                new ApplicationError(error.error, error.error_description, error.trace || 'sys_conn_http_req3')
+              );
+            }
+
+            return reject(new ApplicationError('invalid_request', JSON.stringify(error), 'sys_conn_http_req4'));
           }
 
           if (response.statusCode === 200) {
@@ -106,6 +110,28 @@ export class HttpConnector {
         return resolve(body);
       });
     });
+  }
+
+  private async error(data) {
+    if (typeof data === 'string') {
+      try {
+        const err = JSON.parse(data);
+        return this.error(err);
+      } catch (e) {
+        return data;
+      }
+    }
+
+    if (data.error && data.description) {
+      const err = this.error(data.description);
+      if (typeof err === 'string') {
+        data.description = err;
+      }
+
+      return data;
+    }
+
+    return data;
   }
 
   private inflate(conf: any, method: string, verb: string, data?: any, headers?: any, raw?: boolean) {
