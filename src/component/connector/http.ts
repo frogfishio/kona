@@ -87,7 +87,15 @@ export class HttpConnector {
           }
 
           if (response.statusCode !== 200) {
-            return reject(new ApplicationError('invalid_request', JSON.stringify(body), 'sys_conn_http_req2'));
+            try {
+              const error = this.materialize(body);
+              if (error.error && error.error_description) {
+                return reject(new ApplicationError(error.error, error.error_description, error.trace));
+              }
+              return reject(new ApplicationError('invalid_request', JSON.stringify(body), 'sys_conn_http_req2'));
+            } catch (err) {
+              return reject(new ApplicationError('invalid_request', JSON.stringify(body), 'sys_conn_http_req3'));
+            }
           }
 
           if (response.statusCode === 200) {
