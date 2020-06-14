@@ -469,7 +469,7 @@ export class Engine {
     // this.loadList.push('delegate');
 
     this.register('roles', 'db');
-    this.register('user-roles', 'db', true);
+    this.register('user-role', 'db', true);
     this.register('delegate', 'db', true);
 
     // // if (this._configuration.get('user')) {
