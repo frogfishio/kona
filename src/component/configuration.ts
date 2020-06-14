@@ -170,7 +170,7 @@ export class Configuration implements Component {
     const ctx = process.env.ENGINE_FILE_CONTEXT;
 
     if (ctx) {
-      let file = conf.file || {};
+      const file = conf.file || {};
       file[ctx] = file[ctx] || {};
       file[ctx].type = file[ctx].type || process.env.ENGINE_FILE_STORE_TYPE;
       file[ctx].store = file[ctx].store || process.env.ENGINE_FILE_STORE;

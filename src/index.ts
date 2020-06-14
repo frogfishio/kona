@@ -401,8 +401,8 @@ export class Engine {
     // }
 
     this.register('memory');
-    this.register('manifest', 'memory');
-    this.register('session', 'memory');
+    this.register('manifest', 'memory', true);
+    this.register('session', 'memory', true);
 
     // if (this._configuration.get('cache')) {
     //   this.loadList.push('cache');
