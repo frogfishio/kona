@@ -436,7 +436,7 @@ export class Engine {
     // if (this._configuration.get('file')) {
     // }
     // this.loadList.push('file');
-    this.register('file', 'db');
+    this.register('file', 'db', true);
 
     // if (this._configuration.get('connectors')) {
     //   this.loadList.push('connector');
