@@ -425,10 +425,10 @@ export class Engine {
     // }
 
     this.register('db');
-    this.register('audit', 'db');
-    this.register('links', 'db');
-    this.register('account', 'db');
-    this.register('master'), 'db';
+    this.register('audit', 'db', true);
+    this.register('links', 'db', true);
+    this.register('account', 'db', true);
+    this.register('master', 'db', true);
 
     // this.loadList.push('modules');
     this.register('modules', null, true);
@@ -468,7 +468,7 @@ export class Engine {
     // this.loadList.push('user-role');
     // this.loadList.push('delegate');
 
-    this.register('roles', 'db');
+    this.register('roles', 'db', true);
     this.register('user-role', 'db', true);
     this.register('delegate', 'db', true);
 
@@ -478,7 +478,7 @@ export class Engine {
     // // }
 
     this.register('limits', 'db', true);
-    this.register('user', 'db');
+    this.register('user', 'db', true);
 
     // if (this._configuration.get('responder')) {
     //   this.loadList.push('responder');

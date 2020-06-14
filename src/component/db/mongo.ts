@@ -38,7 +38,7 @@ export class MongoDBProtocol implements DB {
         for (let i = 0; i < this.conf.hosts.length; i++) {
           connectUrl += `${this.conf.hosts[0].host}:${this.conf.hosts[i].port}${
             i < this.conf.hosts.length - 1 ? ',' : ''
-          }`;
+            }`;
         }
         connectUrl += `/${this.conf.name}?replicaSet=${this.conf.replicaset}`;
       }
@@ -46,7 +46,7 @@ export class MongoDBProtocol implements DB {
       logger.info('Connecting to MongoDB: ' + connectUrl);
 
       const MongoClient = mongo.MongoClient;
-      MongoClient.connect(connectUrl, { native_parser: true, useNewUrlParser: true }, (err, connection) => {
+      MongoClient.connect(connectUrl, { native_parser: true, useNewUrlParser: true, useUnifiedTopology: true }, (err, connection) => {
         if (err) {
           return reject(new ApplicationError('database_error', null, '3249567821', err));
         } else {
