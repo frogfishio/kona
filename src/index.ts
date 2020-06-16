@@ -355,7 +355,7 @@ export class Engine {
 
   private loadList = [];
 
-  async init(): Promise<any> {
+  private async initComponents(): Promise<any> {
     // Init core logger
     this._configuration = new Configuration(this.configPath, this.override);
     await this._configuration.init();
@@ -499,14 +499,39 @@ export class Engine {
 
     this.register('init');
 
-    await this.loadList.reduce((promise, componentName) => {
+    return this.loadList.reduce((promise, componentName) => {
       return promise.then(() => {
         logger.info(`Loading ${componentName}`);
         return this.load(componentName).init();
       });
     }, Promise.resolve());
 
+    // try {
+    //   // Check if any services are registered
+    //   if (this.services || this.registry) {
+    //     this._listener = new Listener(this);
+    //     this.manage(this._listener);
+    //     await this._listener.init();
+
+    //     // check if we have runner configuration
+    //   } else if (this.configuration.get('system').run) {
+    //     const runner = require(this.configuration.get('system').run);
+    //     logger.info(`Running: ${this.configuration.get('system').run}`);
+    //     await runner.default(this);
+    //     logger.info('Runner executed');
+    //   } else {
+    //     return Promise.reject('No service or run system specified');
+    //   }
+    // } catch (err) {
+    //   logger.emergency(err);
+    //   process.exit(1);
+    // }
+  }
+
+  async init() {
     try {
+      await this.initComponents();
+
       // Check if any services are registered
       if (this.services || this.registry) {
         this._listener = new Listener(this);
@@ -518,7 +543,6 @@ export class Engine {
         const runner = require(this.configuration.get('system').run);
         logger.info(`Running: ${this.configuration.get('system').run}`);
         await runner.default(this);
-        logger.info('Runner executed');
       } else {
         return Promise.reject('No service or run system specified');
       }
@@ -538,7 +562,7 @@ export class Engine {
     }, Promise.resolve());
   }
 
-  manage(component: Component): Component {
+  private manage(component: Component): Component {
     this.manageable.push(component);
     return component;
   }
