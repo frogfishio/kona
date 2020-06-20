@@ -40,7 +40,7 @@ export class MongoDBProtocol implements DB {
             i < this.conf.hosts.length - 1 ? ',' : ''
             }`;
         }
-        connectUrl += `/${this.conf.name}?replicaSet=${this.conf.replicaset}`;
+        connectUrl += `/${this.conf.name}?replicaSet=${this.conf.replicaset}&keepAlive=true&autoReconnect=true&socketTimeoutMS=0`;
       }
 
       logger.info('Connecting to MongoDB: ' + connectUrl);
