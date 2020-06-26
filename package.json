@@ -16,7 +16,11 @@
   "author": "el'diablo <eldiablolives@live.com>",
   "license": "LGPL3",
   "dependencies": {
+<<<<<<< HEAD
     "aws-sdk": "^2.705.0",
+=======
+    "aws-sdk": "^2.701.0",
+>>>>>>> 38569c3fca4a5c5123049abd3b5fc9ebfe721b57
     "body-parser": "^1.19.0",
     "commander": "^5.1.0",
     "cookie-parser": "^1.4.5",
