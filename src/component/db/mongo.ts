@@ -38,7 +38,7 @@ export class MongoDBProtocol implements DB {
         for (let i = 0; i < this.conf.hosts.length; i++) {
           connectUrl += `${this.conf.hosts[0].host}:${this.conf.hosts[i].port}${
             i < this.conf.hosts.length - 1 ? ',' : ''
-            }`;
+          }`;
         }
         connectUrl += `/${this.conf.name}?replicaSet=${this.conf.replicaset}`;
       }
@@ -46,15 +46,19 @@ export class MongoDBProtocol implements DB {
       logger.info('Connecting to MongoDB: ' + connectUrl);
 
       const MongoClient = mongo.MongoClient;
-      MongoClient.connect(connectUrl, { native_parser: true, useNewUrlParser: true, useUnifiedTopology: true }, (err, connection) => {
-        if (err) {
-          return reject(new ApplicationError('database_error', null, '3249567821', err));
-        } else {
-          this.connection = connection;
-          this.db = connection.db(dbName);
-          return resolve();
+      MongoClient.connect(
+        connectUrl,
+        { native_parser: true, useNewUrlParser: true, useUnifiedTopology: true },
+        (err, connection) => {
+          if (err) {
+            return reject(new ApplicationError('database_error', null, '3249567821', err));
+          } else {
+            this.connection = connection;
+            this.db = connection.db(dbName);
+            return resolve();
+          }
         }
-      });
+      );
     });
   }
 
@@ -107,7 +111,9 @@ export class MongoDBProtocol implements DB {
     return this.find(collectionName, criteria).then((result) => {
       if (!result) {
         debug(`One not found in collection ${collectionName} criteria ${JSON.stringify(criteria)}`);
-        return Promise.reject(new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_fo1'));
+        return Promise.reject(
+          new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_fo1')
+        );
       }
 
       if (!fileds) {
@@ -253,6 +259,7 @@ export class MongoDBProtocol implements DB {
 
           result.project(criteriaFilter).toArray((err, data) => {
             if (err) {
+              logger.error(err);
               return reject(
                 new ApplicationError(
                   'database_error',
@@ -402,7 +409,9 @@ export class MongoDBProtocol implements DB {
           }
 
           if (res.result.nModified === 0) {
-            return reject(new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_update2'));
+            return reject(
+              new ApplicationError('not_found', `Object in ${collectionName} not found`, 'sys_mdb_update2')
+            );
           }
         }
 
