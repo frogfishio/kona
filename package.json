@@ -16,11 +16,7 @@
   "author": "el'diablo <eldiablolives@live.com>",
   "license": "LGPL3",
   "dependencies": {
-<<<<<<< HEAD
     "aws-sdk": "^2.747.0",
-=======
-    "aws-sdk": "^2.738.0",
->>>>>>> bbd71607a87388e56a8a3816c1fa7b0df274ed6c
     "body-parser": "^1.19.0",
     "commander": "^5.1.0",
     "cookie-parser": "^1.4.5",
@@ -35,11 +31,7 @@
     "luxon": "^1.25.0",
     "mailgun-js": "^0.22.0",
     "mime": "^2.4.6",
-<<<<<<< HEAD
     "mongodb": "^3.6.1",
-=======
-    "mongodb": "^3.6.0",
->>>>>>> bbd71607a87388e56a8a3816c1fa7b0df274ed6c
     "ms": "^2.1.2",
     "request": "^2.88.2",
     "shortid": "^2.2.15",
@@ -50,13 +42,8 @@
     "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
-<<<<<<< HEAD
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.6.4",
-=======
-    "@types/mocha": "^2.2.48",
-    "@types/node": "^8.10.62",
->>>>>>> bbd71607a87388e56a8a3816c1fa7b0df274ed6c
     "chai": "^4.2.0",
     "chai-like": "^1.1.1",
     "chai-things": "^0.2.0",
