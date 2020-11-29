@@ -20,7 +20,7 @@ export class S3Protocol {
         accessKeyId: this.conf.key,
         secretAccessKey: this.conf.secret
       };
-      return resolve();
+      return resolve(null);
     });
   }
 

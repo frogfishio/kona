@@ -82,7 +82,7 @@ export class JobQueue {
   private async _wait(millis: number): Promise<any> {
     logger.debug(`Throttling for ${millis} milliseconds`);
     return new Promise(resolve => {
-      setTimeout(() => resolve(), millis);
+      setTimeout(() => resolve(null), millis);
     });
   }
 

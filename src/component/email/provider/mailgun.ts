@@ -20,7 +20,7 @@ export class MailgunProvider {
         if (err) {
           return reject(new ApplicationError('system_error', `Error sending message ${err}`, 'com_email_se1'));
         }
-        return resolve();
+        return resolve(null);
       });
     });
   }

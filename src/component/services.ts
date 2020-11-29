@@ -44,7 +44,7 @@ export class Services implements Component {
             } else {
               this.initService(data)
                 .then(() => {
-                  return resolve();
+                  return resolve(null);
                 })
                 .catch(initSrvErr => {
                   return reject(initSrvErr);
@@ -112,7 +112,7 @@ export class Services implements Component {
         });
       }
 
-      return resolve();
+      return resolve(null);
     });
   }
 

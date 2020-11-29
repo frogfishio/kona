@@ -12,7 +12,7 @@ export class LocalProtocol {
   async init(): Promise<any> {
     return new Promise((resolve, reject) => {
       logger.info('Initialising Local File Protocol');
-      return resolve();
+      return resolve(null);
     });
   }
 

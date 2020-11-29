@@ -46,7 +46,7 @@ export class Memory implements Component {
           });
           this.client.on('connect', () => {
             logger.info('Memory back-end connected');
-            return resolve();
+            return resolve(null);
           });
           break;
         case 'direct':
@@ -60,7 +60,7 @@ export class Memory implements Component {
           });
           this.client.on('connect', () => {
             logger.info('Memory back-end connected');
-            return resolve();
+            return resolve(null);
           });
           break;
         default:
@@ -72,7 +72,7 @@ export class Memory implements Component {
   release(): Promise<any> {
     this.client.quit();
     logger.info('Released');
-    return Promise.resolve();
+    return Promise.resolve(null);
   }
 
   async get(key: string): Promise<any> {
@@ -92,7 +92,7 @@ export class Memory implements Component {
         }
 
         if (!data) {
-          return resolve();
+          return resolve(null);
         }
 
         if (this.conf.secure === true) {

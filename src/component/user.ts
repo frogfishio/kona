@@ -569,7 +569,7 @@ export class User implements Component {
         }
       }
 
-      return resolve();
+      return resolve(null);
     });
   }
 

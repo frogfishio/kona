@@ -77,7 +77,7 @@ export class Email implements Component {
         );
       }
 
-      return resolve();
+      return resolve(null);
     });
   }
 }

@@ -115,7 +115,7 @@ export class Listener implements Component {
 
       this.server = express.listen(this.port, this.address);
       logger.info(`Waiting for connections on ${this.address} port ${this.port}`);
-      return resolve();
+      return resolve(null);
     });
   }
 

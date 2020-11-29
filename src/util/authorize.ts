@@ -20,6 +20,6 @@ module.exports = (user: any, requiredPermissions: string | Array<string>, accoun
       return reject(new ApplicationError('insufficient_scope', 'Insufficient privilege', '9625573689'));
     }
 
-    return resolve();
+    return resolve(null);
   });
 };

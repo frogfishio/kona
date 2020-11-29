@@ -49,7 +49,7 @@ export class Configuration implements Component {
             this.conf['system'].root = this.root() + '/' + this.conf['system'].root;
           }
         }
-        resolve();
+        resolve(null);
       } catch (err) {
         reject(err);
       }

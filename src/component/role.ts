@@ -228,7 +228,7 @@ export class Role implements Component {
       //   return reject(new ApplicationError('auth_error', 'Missing role code', 'sys_role_va3'));
       // }
 
-      resolve();
+      resolve(null);
     });
   }
 

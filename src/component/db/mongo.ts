@@ -55,7 +55,7 @@ export class MongoDBProtocol implements DB {
           } else {
             this.connection = connection;
             this.db = connection.db(dbName);
-            return resolve();
+            return resolve(null);
           }
         }
       );
