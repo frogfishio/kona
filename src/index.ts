@@ -415,7 +415,8 @@ export class Engine {
     this.register("auth");
     this.register("token", "auth", true);
 
-    this.register("email");
+    // TODO: replace mailgun-js with homegrown
+    // this.register("email");
 
     this.register("templates");
 
