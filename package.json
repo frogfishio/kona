@@ -7,7 +7,7 @@
     "test": "DEBUG=engine* ENGINE_SYSTEM_ROOT=$PWD mocha --timeout 5000 --recursive build/debug/test/",
     "watch": "gulp prepare-debug; tsc -w",
     "dist": "gulp compile_dist; npm version patch; gulp dist",
-    "start": "DEBUG='engine*,sync*' node build/debug/src/engine.js -c test/support/engine.yaml",
+    "start": "DEBUG='engine*,sync*' node build/debug/src/engine.js -c test/service.yaml --root $PWD",
     "builtin-demo": "DEBUG='engine*' node build/debug/src/engine -c demo/hello/builtin/hello-service.yaml --root $PWD"
   },
   "bin": {

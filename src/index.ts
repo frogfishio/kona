@@ -1,46 +1,46 @@
-import { Component } from './component/index';
-import { ApplicationError, KonaError } from './error';
+import { Component } from "./component/index";
+import { ApplicationError, KonaError } from "./error";
 
 // Components
-import { Configuration } from './component/configuration';
-import { Logger } from './component/logger';
-import { Modules } from './component/modules';
-import { Services } from './component/services';
-import { Heartbeat } from './component/heartbeat';
-import { Memory } from './component/memory';
-import { Files } from './component/file';
-import { Listener } from './component/listener';
-import { Events } from './component/events';
-import { Cache } from './component/cache';
-import { Token } from './component/token';
-import { Role } from './component/role';
-import { User } from './component/user';
-import { Connector } from './component/connector';
-import { Responder } from './component/responder';
-import { Email } from './component/email';
-import { Template } from './component/template';
-import { Scheduler } from './component/scheduler';
-import { Init } from './component/init';
-import { DB } from './component/db/index';
-import { Session } from './component/session';
-import { Manifest } from './component/manifest';
-import { Account } from './component/account';
-import { Audit } from './component/audit';
-import { Auth } from './component/auth';
-import { MongoDBProtocol } from './component/db/mongo';
-import { Links } from './component/links';
-import { Authenticator, Authoriser } from './types';
-import { MasterData } from './component/master';
-import { Registry } from './component/registry';
-import { Limits } from './component/limits';
-import { UserRole } from './component/user-role';
-import { Delegate } from './component/delegate';
+import { Configuration } from "./component/configuration";
+import { Logger } from "./component/logger";
+import { Modules } from "./component/modules";
+import { Services } from "./component/services";
+import { Heartbeat } from "./component/heartbeat";
+import { Memory } from "./component/memory";
+import { Files } from "./component/file";
+import { Listener } from "./component/listener";
+import { Events } from "./component/events";
+import { Cache } from "./component/cache";
+import { Token } from "./component/token";
+import { Role } from "./component/role";
+import { User } from "./component/user";
+import { Connector } from "./component/connector";
+import { Responder } from "./component/responder";
+import { Email } from "./component/email";
+import { Template } from "./component/template";
+import { Scheduler } from "./component/scheduler";
+import { Init } from "./component/init";
+import { DB } from "./component/db/index";
+import { Session } from "./component/session";
+import { Manifest } from "./component/manifest";
+import { Account } from "./component/account";
+import { Audit } from "./component/audit";
+import { Auth } from "./component/auth";
+import { MongoDBProtocol } from "./component/db/mongo";
+import { Links } from "./component/links";
+import { Authenticator, Authoriser } from "./types";
+import { MasterData } from "./component/master";
+import { Registry } from "./component/registry";
+import { Limits } from "./component/limits";
+import { UserRole } from "./component/user-role";
+import { Delegate } from "./component/delegate";
 
 let logger;
 // const debug = require('debug')('engine');
 
 export class Engine {
-  private _instanceId = require('uuid').v4();
+  private _instanceId = require("uuid").v4();
   private _configuration: Configuration;
   private _log: Logger;
   private _modules: Modules;
@@ -104,7 +104,7 @@ export class Engine {
 
   get db() {
     if (!this._db) {
-      throw new Error('Tryng to access uninitialised database');
+      throw new Error("Tryng to access uninitialised database");
     }
     return this._db;
   }
@@ -206,28 +206,28 @@ export class Engine {
   constructor(private configPath: string, private override?: any) {
     if (override && override.apm) {
       const apmconf = {
-        serviceName: override.service || 'engine',
-        secretToken: '',
+        serviceName: override.service || "engine",
+        secretToken: "",
         serverUrl: override.apm, // || 'http://localhost:8200' //'http://host.docker.internal:8200'
       };
       console.log(`Created engine with APM ${apmconf.serviceName} sending to ${apmconf.serverUrl}`);
-      this._apm = require('elastic-apm-node').start(apmconf);
+      this._apm = require("elastic-apm-node").start(apmconf);
     }
   }
 
   get systemUser() {
-    const sysconf = this._configuration.get('system') || {};
+    const sysconf = this._configuration.get("system") || {};
     return {
-      id: sysconf.user || '_system',
-      account: sysconf.account || '_system',
-      permissions: sysconf.permissions || ['_system', 'admin'],
+      id: sysconf.user || "_system",
+      account: sysconf.account || "_system",
+      permissions: sysconf.permissions || ["_system", "admin"],
     };
   }
 
   async authenticate(request: any) {
-    const config = this.configuration.get('auth');
+    const config = this.configuration.get("auth");
     if (!config || !config.authenticator) {
-      throw new ApplicationError('system_error', `Authenticator not configured`, '5939792437');
+      throw new ApplicationError("system_error", `Authenticator not configured`, "5939792437");
     }
 
     try {
@@ -239,9 +239,9 @@ export class Engine {
   }
 
   async authorise(user: any) {
-    const config = this.configuration.get('auth');
+    const config = this.configuration.get("auth");
     if (!config || !config.authoriser) {
-      throw new ApplicationError('system_error', `Authoriser not configured`, '4143639573');
+      throw new ApplicationError("system_error", `Authoriser not configured`, "4143639573");
     }
 
     try {
@@ -254,97 +254,97 @@ export class Engine {
 
   private load(component: string): Component {
     switch (component) {
-      case 'modules':
+      case "modules":
         this._modules = new Modules(this);
         return this._modules;
-      case 'services':
+      case "services":
         this._services = new Services(this);
         return this._services;
-      case 'events':
+      case "events":
         this._events = new Events(this);
         return this.manage(this._events);
-      case 'heartbeat':
+      case "heartbeat":
         this._heartbeat = new Heartbeat(this);
         return this.manage(this._heartbeat);
-      case 'scheduler':
+      case "scheduler":
         this._scheduler = new Scheduler(this);
         return this.manage(this._scheduler);
-      case 'memory':
+      case "memory":
         this._memory = new Memory(this);
         return this.manage(this._memory);
-      case 'cache':
+      case "cache":
         this._cache = new Cache(this);
         return this.manage(this._cache);
-      case 'file':
+      case "file":
         this._files = new Files(this);
         return this.manage(this._files);
-      case 'token':
+      case "token":
         this._token = new Token(this);
         return this.manage(this._token);
-      case 'session':
+      case "session":
         this._session = new Session(this);
         return this.manage(this._session);
-      case 'manifest':
+      case "manifest":
         this._manifest = new Manifest(this);
         return this.manage(this._manifest);
-      case 'connector':
+      case "connector":
         this._connector = new Connector(this);
         return this.manage(this._connector);
-      case 'roles':
+      case "roles":
         this._role = new Role(this);
         return this.manage(this._role);
-      case 'account':
+      case "account":
         this._account = new Account(this);
         return this.manage(this._account);
-      case 'audit':
+      case "audit":
         this._audit = new Audit(this);
         return this.manage(this._audit);
-      case 'user':
+      case "user":
         this._user = new User(this);
         return this.manage(this._user);
-      case 'auth':
+      case "auth":
         this._auth = new Auth(this);
         return this.manage(this._auth);
-      case 'email':
+      case "email":
         this._email = new Email(this);
         return this.manage(this._email);
-      case 'templates':
+      case "templates":
         this._template = new Template(this);
         return this.manage(this._template);
-      case 'init':
+      case "init":
         this._init = new Init(this);
         return this.manage(this._init);
-      case 'responder':
+      case "responder":
         this._responder = new Responder(this);
         return this.manage(this._responder);
-      case 'master':
+      case "master":
         this._master = new MasterData(this);
         return this.manage(this._master);
-      case 'registry':
+      case "registry":
         this._registry = new Registry(this);
         return this.manage(this._registry);
-      case 'limits':
+      case "limits":
         this._limits = new Limits(this);
         return this.manage(this._limits);
-      case 'delegate':
+      case "delegate":
         this._delegate = new Delegate(this);
         return this.manage(this._delegate);
-      case 'user-role':
+      case "user-role":
         this._user_role = new UserRole(this);
         return this.manage(this._user_role);
-      case 'db':
-        switch (this._configuration.get('db').type) {
-          case 'mongo':
+      case "db":
+        switch (this._configuration.get("db").type) {
+          case "mongo":
             this._db = new MongoDBProtocol(this);
             return this.manage(this._db);
           default:
             throw new ApplicationError(
-              'system_error',
-              `Invalid database type ${this._configuration.get('data').type} configured`,
-              '7159960532'
+              "system_error",
+              `Invalid database type ${this._configuration.get("data").type} configured`,
+              "7159960532"
             );
         }
-      case 'links':
+      case "links":
         this._links = new Links(this);
         return this.manage(this._links);
       default:
@@ -360,23 +360,23 @@ export class Engine {
     this._configuration = new Configuration(this.configPath, this.override);
     await this._configuration.init();
 
-    this._log = new Logger(this._configuration.get('system'));
-    logger = this._log.log('engine');
+    this._log = new Logger(this._configuration.get("system"));
+    logger = this._log.log("engine");
 
     // Init sequence is important
     logger.info(
-      `Engine initialising [${this.configuration.get('system').id}] with root ${this.configuration.get('system').root}`
+      `Engine initialising [${this.configuration.get("system").id}] with root ${this.configuration.get("system").root}`
     );
 
     // Test and create system folders where necessary
-    if (this.configuration.get('system').folders) {
-      const fs = require('fs');
-      logger.info('Checking folders');
+    if (this.configuration.get("system").folders) {
+      const fs = require("fs");
+      logger.info("Checking folders");
 
-      for (const folder of this.configuration.get('system').folders) {
-        let partial = '';
-        for (const part of folder.split('/')) {
-          partial += '/' + part;
+      for (const folder of this.configuration.get("system").folders) {
+        let partial = "";
+        for (const part of folder.split("/")) {
+          partial += "/" + part;
           if (!fs.existsSync(partial)) {
             fs.mkdirSync(partial);
           }
@@ -386,118 +386,51 @@ export class Engine {
     }
 
     // Initialse system components
-    logger.info('Initialising system components');
+    logger.info("Initialising system components");
 
     // this.loadList = ['events', 'heartbeat'];
-    this.register('events', null, true);
-    this.register('heartbeat', null, true);
+    this.register("events", null, true);
+    this.register("heartbeat", null, true);
 
-    // if (this._configuration.get('memory')) {
-    //   this.loadList.push('memory');
-    //   this.loadList.push('manifest');
-    //   // Load session if memory is enabled
-    //   // TODO: add session config
-    //   this.loadList.push('session');
-    // }
+    this.register("memory");
+    this.register("manifest", "memory", true);
+    this.register("session", "memory", true);
 
-    this.register('memory');
-    this.register('manifest', 'memory', true);
-    this.register('session', 'memory', true);
+    this.register("cache");
 
-    // if (this._configuration.get('cache')) {
-    //   this.loadList.push('cache');
-    // }
+    this.register("registry");
 
-    this.register('cache');
+    this.register("db");
+    this.register("audit", "db", true);
+    this.register("links", "db", true);
+    this.register("account", "db", true);
+    this.register("master", "db", true);
 
-    // if (this._configuration.get('registry')) {
-    //   this.loadList.push('registry');
-    // }
+    this.register("modules", null, true);
 
-    this.register('registry');
+    this.register("file", "db", true);
 
-    // if (this._configuration.get('db')) {
-    //   this.loadList.push('db');
-    //   this.loadList.push('audit');
-    //   this.loadList.push('links');
-    //   this.loadList.push('account');
-    //   this.loadList.push('master');
-    // }
+    this.register("connector");
 
-    this.register('db');
-    this.register('audit', 'db', true);
-    this.register('links', 'db', true);
-    this.register('account', 'db', true);
-    this.register('master', 'db', true);
+    this.register("auth");
+    this.register("token", "auth", true);
 
-    // this.loadList.push('modules');
-    this.register('modules', null, true);
+    this.register("email");
 
-    // if (this._configuration.get('file')) {
-    // }
-    // this.loadList.push('file');
-    this.register('file', 'db', true);
+    this.register("templates");
 
-    // if (this._configuration.get('connectors')) {
-    //   this.loadList.push('connector');
-    // }
+    this.register("roles", "db", true);
+    this.register("user-role", "db", true);
+    this.register("delegate", "db", true);
 
-    this.register('connector');
+    this.register("limits", "db", true);
+    this.register("user", "db", true);
 
-    // if (this._configuration.get('auth')) {
-    //   this.loadList.push('auth');
-    //   this.loadList.push('token');
-    // }
+    this.register("responder");
 
-    this.register('auth');
-    this.register('token', 'auth', true);
+    this.register("scheduler", "db");
 
-    // if (this._configuration.get('email')) {
-    //   this.loadList.push('email');
-    // }
-
-    this.register('email');
-
-    // if (this._configuration.get('templates')) {
-    //   this.loadList.push('templates');
-    // }
-
-    this.register('templates');
-
-    // this.loadList.push('roles');
-    // this.loadList.push('user-role');
-    // this.loadList.push('delegate');
-
-    this.register('roles', 'db', true);
-    this.register('user-role', 'db', true);
-    this.register('delegate', 'db', true);
-
-    // // if (this._configuration.get('user')) {
-    // this.loadList.push('limits');
-    // this.loadList.push('user');
-    // // }
-
-    this.register('limits', 'db', true);
-    this.register('user', 'db', true);
-
-    // if (this._configuration.get('responder')) {
-    //   this.loadList.push('responder');
-    // }
-
-    this.register('responder');
-
-    // if (this._configuration.get('db') && this._configuration.get('scheduler')) {
-    //   this.loadList.push('scheduler');
-    // }
-
-    this.register('scheduler', 'db');
-
-    // // after all is loaded run external init
-    // if (this._configuration.get('init')) {
-    //   this.loadList.push('init');
-    // }
-
-    this.register('init');
+    this.register("init");
 
     return this.loadList.reduce((promise, componentName) => {
       return promise.then(() => {
@@ -505,27 +438,6 @@ export class Engine {
         return this.load(componentName).init();
       });
     }, Promise.resolve());
-
-    // try {
-    //   // Check if any services are registered
-    //   if (this.services || this.registry) {
-    //     this._listener = new Listener(this);
-    //     this.manage(this._listener);
-    //     await this._listener.init();
-
-    //     // check if we have runner configuration
-    //   } else if (this.configuration.get('system').run) {
-    //     const runner = require(this.configuration.get('system').run);
-    //     logger.info(`Running: ${this.configuration.get('system').run}`);
-    //     await runner.default(this);
-    //     logger.info('Runner executed');
-    //   } else {
-    //     return Promise.reject('No service or run system specified');
-    //   }
-    // } catch (err) {
-    //   logger.emergency(err);
-    //   process.exit(1);
-    // }
   }
 
   async init() {
@@ -539,21 +451,25 @@ export class Engine {
         await this._listener.init();
 
         // check if we have runner configuration
-      } else if (this.configuration.get('system').run) {
-        const runner = require(this.configuration.get('system').run);
-        logger.info(`Running: ${this.configuration.get('system').run}`);
+      } else if (this.configuration.get("system").run) {
+        const runner = require(this.configuration.get("system").run);
+        logger.info(`Running: ${this.configuration.get("system").run}`);
         await runner.default(this);
       } else {
-        return Promise.reject('No service or run system specified');
+        return Promise.reject("No service or run system specified");
       }
     } catch (err) {
-      logger.emergency(err);
+      if (logger) {
+        logger.emergency(err);
+      } else {
+        console.error(err);
+      }
       process.exit(1);
     }
   }
 
   release() {
-    logger.info('Releasing system');
+    logger.info("Releasing system");
 
     return this.manageable.reverse().reduce((promise, component) => {
       return promise.then(() => {
@@ -579,7 +495,7 @@ export class Engine {
               throw new ApplicationError(
                 KonaError.SYSTEM_ERROR,
                 `Missing dependency ${dependencies} to register ${commponentName}`,
-                'sys_core_reg2'
+                "sys_core_reg2"
               );
             }
           }
@@ -591,7 +507,7 @@ export class Engine {
             throw new ApplicationError(
               KonaError.SYSTEM_ERROR,
               `Missing dependency ${dependencies} to register ${commponentName}`,
-              'sys_core_reg2'
+              "sys_core_reg2"
             );
           }
         }

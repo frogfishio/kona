@@ -1,0 +1,497 @@
+swagger: '2.0'
+info:
+  title: User service
+  description: Service that manages users
+  version: 1.0.0
+host: localhost
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  '/user':
+    post: 
+      summary: Cretes user in global context
+      description: |
+        Creates user in global context
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'create_users'
+  '/user/{id}':
+    get:
+      summary: Get user by id
+      description: |
+        Returns array of files information
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'read_users'
+    put:
+      summary: Update user (status etc.)
+      description: |
+        Update user information
+      parameters:
+        - name: id
+          in: path
+          description: User id
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'modify_users'
+    delete:
+      summary: Delets user
+      description: |
+        Deletes user
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - delete_users'
+  '/user/{id}/password':
+    put: # Manual Authorisation
+      summary: Updates user password
+      description: |
+        Updates users password
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/user/{id}/email':
+    put: # Manual Authorisation
+      summary: Updates user email
+      description: |
+        Updates users email
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/user/{id}/role/{roleid}':
+    put:
+      summary: Adds role to user
+      description: |
+        Restores deleted file or folder
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+        - name: roleid
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'modify_user_roles'
+    delete:
+      summary: Removes role from user
+      description: |
+        Restores deleted file or folder
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+        - name: roleid
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'modify_user_roles'
+  '/user/{id}/roles':
+    get:
+      summary: Lists user roles
+      description: |
+        Lists user roles
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'read_users'
+  '/user/{id}/preferences':
+    put: # Manual Authorisation
+      summary: Replace user preferences
+      description: |
+        Update user preferences
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch: # Manual Authorisation
+      summary: Update user preferences
+      description: |
+        Update user preferences
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/user/{id}/meta':
+    put: # Manual Authorisation
+      summary: Replace user's meta
+      description: |
+        Replace user's meta
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch: # Manual Authorisation
+      summary: Update user meta
+      description: |
+        Update user meta
+      parameters:
+        - name: id
+          in: path
+          description: File identifier
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /user/register:
+    post:
+      summary: Register global user
+      description: |
+        Registers the user on the system and returns token
+      consumes: 
+        - multipart/form-data
+      parameters:
+        - name: email
+          in: formData
+          description: Email address
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: Password of a user
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/user/reset/{resetCode}':
+    post: # Open
+      summary: Starts password reset process
+      description: |
+        Starts password reset process, reset code parameter is ignored
+      parameters:
+        - name: resetCode
+          in: path
+          description: Context name
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put: # Open
+      summary: Updates password using reset code
+      description: |
+        Updates password using reset code
+      parameters:
+        - name: resetCode
+          in: path
+          description: Context name
+          required: true
+          type: string
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/user/verify':
+    put: 
+      summary: Verifies user with code in body
+      description: |
+        Verified user using code in body (email link)
+      tags:
+        - User self
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/users/{skip}/{limit}':
+    get:
+      summary: Get a list of users
+      description: |
+        Returns array of files information
+      parameters:
+        - name: skip
+          in: path
+          description: File identifier
+          required: true
+          type: number
+        - name: limit
+          in: path
+          description: File identifier
+          required: true
+          type: number
+      tags:
+        - Users
+      responses:
+        '200':
+          description: An array of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - user_auth:
+            - 'read_users'
+definitions:
+  User:
+    properties:
+      _uuid:
+        type: string
+        description: >-
+          Unique identifier representing a specific user
+      account:
+        type: string
+        description: Account ID for the user
+      email:
+        type: string
+        description: Email of the user
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+securityDefinitions:
+  user_auth:
+    type: basic

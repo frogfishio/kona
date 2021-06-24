@@ -1,20 +1,20 @@
-import { ApplicationError } from '../error';
-import { Component } from './index';
-import { Engine } from '..';
-import { TreeNode } from '../util/tree';
+import { ApplicationError } from "../error";
+import { Component } from "./index";
+import { Engine } from "..";
+import { TreeNode } from "../util/tree";
 
 let logger;
 
 export class Registry implements Component {
   private _conf;
   private _root;
-  private _swaggerParser = require('swagger-parser');
+  private _swaggerParser = require("swagger-parser");
   private _registry = new TreeNode();
 
   constructor(private engine: Engine) {
-    logger = engine.log.log('engine:registy');
-    this._conf = engine.configuration.get('registry');
-    this._root = this.engine.configuration.get('system').root;
+    logger = engine.log.log("engine:registy");
+    this._conf = engine.configuration.get("registry");
+    this._root = this.engine.configuration.get("system").root;
   }
 
   async init(): Promise<any> {
@@ -23,7 +23,7 @@ export class Registry implements Component {
       await this.service(name, this._conf.services[name]);
     }
 
-    logger.info('Initialised');
+    logger.info("Initialised");
     return Promise.resolve();
   }
 
@@ -49,7 +49,7 @@ export class Registry implements Component {
     for (const spec of specs) {
       this.initService(spec, conf.handlers);
     }
-    logger.debug('All service handlers loaded');
+    logger.debug("All service handlers loaded");
 
     if (conf.configuration) {
       logger.debug(`Registering service configuration for ${name}`);
@@ -57,7 +57,7 @@ export class Registry implements Component {
     }
 
     if (conf.register) {
-      logger.debug('Registering service with ' + this._root + conf.register);
+      logger.debug("Registering service with " + this._root + conf.register);
       const reg = require(this._root + conf.register);
       await reg(this.engine, conf.configuration);
     }
@@ -69,13 +69,7 @@ export class Registry implements Component {
       this._swaggerParser.validate(path, (err, data) => {
         if (err) {
           logger.error(err);
-          return reject(
-            new ApplicationError(
-              'system_error',
-              `Service validation error for ${path}`,
-              'sys_reg_inval'
-            )
-          );
+          return reject(new ApplicationError("system_error", `Service validation error for ${path}`, "sys_reg_inval"));
         }
 
         return resolve(data);
@@ -88,40 +82,33 @@ export class Registry implements Component {
     const paths = Object.getOwnPropertyNames(service.paths);
 
     for (let j = 0; j < paths.length; j++) {
-      const path =
-        service.basePath === '/' ? paths[j] : service.basePath + paths[j];
-      const parts = path.split('/').splice(1);
-      let loadpath = '';
+      const path = service.basePath === "/" ? paths[j] : service.basePath + paths[j];
+      const parts = path.split("/").splice(1);
+      let loadpath = "";
 
       for (let n = 0; n < parts.length; n++) {
         if (!parts[n].match(re)) {
-          loadpath += '/' + parts[n];
+          loadpath += "/" + parts[n];
         }
       }
 
       const methods = {};
-      for (const method of Object.getOwnPropertyNames(
-        service.paths[paths[j]]
-      )) {
+      for (const method of Object.getOwnPropertyNames(service.paths[paths[j]])) {
         methods[method] = {
-          security: service.paths[paths[j]][method].security
+          security: service.paths[paths[j]][method].security,
         };
       }
 
       const handler = this.loadHandler(handlers, loadpath);
 
       if (!handler) {
-        throw new ApplicationError(
-          'system_error',
-          `Handler for path ${loadpath} not found`,
-          'sys_srv_lh'
-        );
+        throw new ApplicationError("system_error", `Handler for path ${loadpath} not found`, "sys_srv_lh");
       }
 
       this._registry.add(parts, {
         method: methods,
         handler: handler,
-        definitions: { security: service.securityDefinitions }
+        definitions: { security: service.securityDefinitions },
       });
     }
   }
@@ -133,16 +120,16 @@ export class Registry implements Component {
 
     try {
       const loadFile = this._root + sources[0] + resource;
-      logger.debug('Trying to load handler: ' + resource + ' from ' + loadFile);
+      logger.debug("Trying to load handler: " + resource + " from " + loadFile);
       const loaded = require(loadFile);
       logger.info(`Handler ${resource} loaded`);
       return loaded.default;
     } catch (ex) {
-      if (ex.code === 'MODULE_NOT_FOUND') {
+      console.log(ex);
+
+      if (ex.code === "MODULE_NOT_FOUND") {
         if (sources.length === 1) {
-          logger.error(
-            `Unable to resolve ${resource} in any of the provided paths`
-          );
+          logger.error(`Unable to resolve ${resource} in any of the provided paths`);
           return null;
         }
         return this.loadHandler(sources.slice(1), resource);

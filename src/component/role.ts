@@ -1,7 +1,7 @@
-import { ApplicationError } from '../error';
-import { Component } from './index';
-import { Engine } from '..';
-import { DB } from './db';
+import { ApplicationError } from "../error";
+import { Component } from "./index";
+import { Engine } from "..";
+import { DB } from "./db";
 
 let logger;
 
@@ -15,13 +15,13 @@ interface IRole {
 }
 
 export enum RoleType {
-  Default = 'default',
-  Assignable = 'assignable',
+  Default = "default",
+  Assignable = "assignable",
 }
 
 export enum RoleStatus {
-  Enabled = 'enabled',
-  Disabled = 'disabled',
+  Enabled = "enabled",
+  Disabled = "disabled",
 }
 
 export class Role implements Component {
@@ -29,18 +29,18 @@ export class Role implements Component {
   private conf;
 
   constructor(private engine: Engine) {
-    logger = engine.log.log('engine:role');
-    this.conf = engine.configuration.get('roles');
+    logger = engine.log.log("engine:role");
+    this.conf = engine.configuration.get("roles");
     this.db = engine.db;
   }
 
   async find(criteria, skip, limit): Promise<any> {
     criteria = criteria || {};
-    return this.db.find('_roles', {
+    return this.db.find("_roles", {
       where: criteria,
       skip: skip,
       limit: limit,
-      filter: ['code', 'name', 'status', 'type', 'permissions', '_uuid'],
+      filter: ["code", "name", "status", "type", "permissions", "_uuid"],
     });
   }
 
@@ -64,9 +64,9 @@ export class Role implements Component {
     const criteria: any = filter || {};
     criteria._uuid = roles;
 
-    return this.db.find('_roles', {
+    return this.db.find("_roles", {
       where: criteria,
-      filter: ['code', 'name', 'status', 'type', 'permissions', '_uuid'],
+      filter: ["code", "name", "status", "type", "permissions", "_uuid"],
     });
   }
 
@@ -82,15 +82,15 @@ export class Role implements Component {
       };
     }
 
-    return this.db.findOne('_roles', {
+    return this.db.findOne("_roles", {
       where: criteria,
-      filter: ['code', '_uuid', 'name', 'status', 'type', 'permissions'],
+      filter: ["code", "_uuid", "name", "status", "type", "permissions"],
     });
   }
 
   async create(role: any): Promise<any> {
-    role.status = role.status || 'enabled';
-    role.type = role.type || 'default';
+    role.status = role.status || "enabled";
+    role.type = role.type || "default";
 
     return Role.validateRole(role).then(() => {
       role = Role.sanitiseRole(role);
@@ -101,33 +101,33 @@ export class Role implements Component {
           .then((foundRole) => {
             if (foundRole) {
               return Promise.reject(
-                new ApplicationError('already_exists', 'Role already exists', 'system_role_create')
+                new ApplicationError("already_exists", "Role already exists", "system_role_create")
               );
             }
           })
           .catch((err) => {
-            if (err && err.error !== 'not_found') {
+            if (err && err.error !== "not_found") {
               return Promise.reject(err);
             }
 
-            return this.db.create('_roles', this.engine.systemUser.account, role);
+            return this.db.create("_roles", this.engine.systemUser.account, role);
           });
       } else {
-        return this.db.create('_roles', this.engine.systemUser.account, role);
+        return this.db.create("_roles", this.engine.systemUser.account, role);
       }
     });
   }
 
   async update(roleIdOrCode, roleData): Promise<any> {
     const role = await this.get(roleIdOrCode);
-    return this.db.update('_roles', role._uuid, Role.sanitiseRole(roleData));
+    return this.db.update("_roles", role._uuid, Role.sanitiseRole(roleData));
   }
 
   async remove(roleIdOrCode): Promise<any> {
     const roleId = (await this.get(roleIdOrCode))._uuid;
-    await this.engine.links.remove('role', roleId);
+    await this.engine.links.remove("role", roleId);
     await this.engine.userRole.removeAll(null, roleId);
-    return this.db.remove('_roles', roleId);
+    return this.db.remove("_roles", roleId);
   }
 
   async listPermissions(roleId): Promise<any> {
@@ -154,9 +154,9 @@ export class Role implements Component {
       }
     }
 
-    const foundRoles = await this.db.find('_roles', {
+    const foundRoles = await this.db.find("_roles", {
       where: { _uuid: { $in: criteria } },
-      filter: ['permissions', '_uuid'],
+      filter: ["permissions", "_uuid"],
     });
 
     const permissions: any = {};
@@ -181,9 +181,9 @@ export class Role implements Component {
       return [];
     }
 
-    const foundRoles = await this.db.find('_roles', {
+    const foundRoles = await this.db.find("_roles", {
       where: { _uuid: { $in: roles } },
-      filter: ['permissions', '_uuid'],
+      filter: ["permissions", "_uuid"],
     });
     for (const role of foundRoles) {
       for (const permission of role.permissions) {
@@ -198,18 +198,18 @@ export class Role implements Component {
 
   async link(roleId: string, to: string, scope?: string, meta?: any) {
     const role = await this.get(roleId);
-    return this.engine.links.add('role', role._uuid, to, scope, meta);
+    return this.engine.links.add("role", role._uuid, to, scope, meta);
   }
 
   async unlink(roleId: string, to?: string, scope?: string) {
     const role = await this.get(roleId);
-    return this.engine.links.remove('role', role._uuid, to, scope);
+    return this.engine.links.remove("role", role._uuid, to, scope);
   }
 
   async links(roleId: string, filter?: any) {
     const role = await this.get(roleId);
     filter = filter || {};
-    filter.type = 'role';
+    filter.type = "role";
     filter.from = role._uuid;
     return this.engine.links.find(filter);
   }
@@ -219,10 +219,10 @@ export class Role implements Component {
   private static validateRole(role): Promise<any> {
     return new Promise((resolve, reject) => {
       if (!role) {
-        return reject(new ApplicationError('auth_error', 'Role contains no data', 'sys_role_va1'));
+        return reject(new ApplicationError("auth_error", "Role contains no data", "sys_role_va1"));
       }
       if (!role.name) {
-        return reject(new ApplicationError('auth_error', 'Missing role name', 'sys_role_va2'));
+        return reject(new ApplicationError("auth_error", "Missing role name", "sys_role_va2"));
       }
       // if (!role.code) {
       //   return reject(new ApplicationError('auth_error', 'Missing role code', 'sys_role_va3'));
@@ -241,27 +241,28 @@ export class Role implements Component {
       description: data.description,
       status: data.status,
     };
-    return require('../util').strip(role);
+    return require("../util").strip(role);
   }
 
   async init(): Promise<any> {
     if (!this.conf) {
-      logger.info('No roles to configure');
+      logger.info("No roles to configure");
       return;
     }
 
-    logger.info('Initialising roles');
+    logger.info("Initialising roles");
     const roleCodes = Object.getOwnPropertyNames(this.conf);
 
     return roleCodes.reduce((promise, roleCode) => {
       return promise.then(() => {
         return this.get(roleCode)
           .then((role) => {
-            logger.info(`Updating ${roleCode} role`);
-            return this.update(roleCode, this.conf[roleCode]);
+            logger.info(`Role ${roleCode} already exists, skipping`);
+            return Promise.resolve();
+            // return this.update(roleCode, this.conf[roleCode]);
           })
           .catch((err) => {
-            if (err.error === 'not_found') {
+            if (err.error === "not_found") {
               logger.info(`Creating ${roleCode} role`);
               const roleData = this.conf[roleCode];
               roleData.code = roleCode;
