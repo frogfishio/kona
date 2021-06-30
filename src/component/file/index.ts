@@ -55,7 +55,15 @@ export class Files implements Component {
     return Promise.resolve();
   }
 
-  async list(fileStoreName: string, fileId: string, filter: any): Promise<any> {
+  async find(criteria: any, fileStoreName?: string, skip?: number, limit?: number): Promise<any> {
+    fileStoreName = fileStoreName || Object.getOwnPropertyNames(this.conf)[0];
+    criteria = criteria || {};
+    return this.db.find('_files_' + fileStoreName, {
+      where: criteria,
+      skip: skip,
+      limit: limit,
+      // filter: ["code", "name", "status", "type", "permissions", "_uuid"],
+    });
     return new Promise((resolve, reject) => {});
   }
 
@@ -97,13 +105,16 @@ export class Files implements Component {
   }
 
   async remove(fileId: string, fileStoreName?: string): Promise<any> {
+    const file = await this.get(fileId, fileStoreName);
     fileStoreName = fileStoreName || Object.getOwnPropertyNames(this.conf)[0];
-    return this.connectors[fileStoreName].remove(fileId);
+    console.log(`Removing -------- ${JSON.stringify(file)}`);
+    await this.connectors[fileStoreName].remove(fileId);
+    return this.db.remove('_files_' + fileStoreName, fileId);
   }
 
-  async update(fileId: string, fileDescriptor: any, file?: ReadableStream): Promise<any> {
-    return new Promise((resolve, reject) => {});
-  }
+  // async update(fileId: string, fileDescriptor: any, file?: ReadableStream): Promise<any> {
+  //   return new Promise((resolve, reject) => {});
+  // }
 
   async get(fileId: string, fileStoreName?: string, includePayload?: boolean): Promise<any> {
     fileStoreName = fileStoreName || Object.getOwnPropertyNames(this.conf)[0];

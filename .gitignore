@@ -3,6 +3,7 @@
 *.js
 *.map
 *.log
+.service.yaml
 !gulpfile.js
 !.gitignore
 !.devcontainer

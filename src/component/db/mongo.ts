@@ -432,7 +432,7 @@ export class MongoDBProtocol implements DB {
     return this.get(collectionName, id).then(() => {
       return this.getCollection(collectionName).then((collection) => {
         return new Promise((resolve, reject) => {
-          collection.update({ _uuid: id }, { $set: { _deleted: true } }, (err) => {
+          collection.updateMany({ _uuid: id }, { $set: { _deleted: true } }, (err) => {
             if (err) {
               return reject(
                 new ApplicationError(

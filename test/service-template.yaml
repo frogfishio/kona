@@ -1,0 +1,50 @@
+###########################################
+# Local test config
+###########################################
+
+system:
+  id: test
+  listen: 0.0.0.0
+  port: 8000
+  root: /app
+  salt: change-for-production
+  run: /home/eldiablo/Work/Kona/core/kona/build/debug/test/run
+
+memory:
+  type: redis
+  model: direct
+  host: localhost
+  port: 6379
+
+db:
+  type: mongo
+  host: localhost
+
+cache:
+  type: global
+  ttl: 60
+
+auth:
+  bearerTokenTTL: 3600 # default
+
+roles:
+  admin:
+    name: Administrator
+    permissions:
+      - 'admin'
+      - 'read_files'
+      - 'write_files'
+      - 'create_files'
+      - 'delete_files'
+  member:
+    name: Member
+    permissions:
+      - member
+
+file:
+  content:
+    track: true
+    type: s3
+    store: <bucket>
+    key: <key>
+    secret: <secret>
