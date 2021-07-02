@@ -4,7 +4,7 @@
   "description": "Frogfish Kona",
   "main": "index.js",
   "scripts": {
-    "test": "DEBUG=engine* ENGINE_SYSTEM_ROOT=$PWD mocha --exit -t 5000 --recursive build/debug/test/",
+    "test": "DEBUG=engine* ENGINE_SYSTEM_ROOT=$PWD mocha --exit -t 7000 --recursive build/debug/test/",
     "watch": "tsc -w",
     "dist": "gulp compile_dist; npm version patch; gulp dist",
     "start": "DEBUG='engine*,sync*' node build/debug/src/engine.js -c test/service.yaml --root $PWD",
