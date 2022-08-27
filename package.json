@@ -1,6 +1,6 @@
 {
   "name": "@frogfish/kona",
-  "version": "2.2.53",
+  "version": "3.0.0",
   "description": "Frogfish Kona",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,6 @@
   "author": "el'diablo <eldiablolives@live.com>",
   "license": "LGPL3",
   "dependencies": {
-    "aws-sdk": "^2.931.0",
     "body-parser": "^1.19.0",
     "commander": "^5.1.0",
     "cookie-parser": "^1.4.5",
@@ -32,13 +31,10 @@
     "mime": "^2.4.7",
     "mongodb": "^3.6.3",
     "ms": "^2.1.3",
-    "request": "^2.88.2",
+    "node-fetch": "^3.2.10",
     "shortid": "^2.2.16",
-    "superagent": "^5.3.1",
     "swagger-parser": "^9.0.1",
-    "uuid": "^8.3.2",
-    "winston": "^2.4.5",
-    "winston-papertrail": "^1.0.5"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/mocha": "^8.2.0",

@@ -25,72 +25,73 @@ export class Logger {
   }
 
   constructor(private conf) {
-    let colorize = true;
-    if (conf.live === true) {
-      colorize = false;
-    }
+    // let colorize = true;
+    // if (conf.live === true) {
+    //   colorize = false;
+    // }
 
-    const winston = require('winston');
-    // tslint:disable-next-line:no-unused-expression
-    require('winston-papertrail').Papertrail;
+    // const winston = require('winston');
+    // // tslint:disable-next-line:no-unused-expression
+    // require('winston-papertrail').Papertrail;
 
-    winston.setLevels({
-      debug: 7,
-      info: 6,
-      warn: 4,
-      error: 3,
-      emergency: 0,
-    });
+    // winston.setLevels({
+    //   debug: 7,
+    //   info: 6,
+    //   warn: 4,
+    //   error: 3,
+    //   emergency: 0,
+    // });
 
-    winston.addColors({
-      debug: 'cyan',
-      info: 'green',
-      warn: 'yellow',
-      error: 'red',
-      emergency: 'magenta',
-    });
+    // winston.addColors({
+    //   debug: 'cyan',
+    //   info: 'green',
+    //   warn: 'yellow',
+    //   error: 'red',
+    //   emergency: 'magenta',
+    // });
 
-    winston.remove(winston.transports.Console);
-    winston.add(winston.transports.Console, {
-      colorize: colorize,
-      stderrLevels: ['error', 'fatal'],
-    });
+    // winston.remove(winston.transports.Console);
+    // winston.add(winston.transports.Console, {
+    //   colorize: colorize,
+    //   stderrLevels: ['error', 'fatal'],
+    // });
 
-    winston.level = this.conf.log ? this.conf.log.level || 'info' : 'info';
+    // winston.level = this.conf.log ? this.conf.log.level || 'info' : 'info';
 
-    winston.info('Logging starting in ' + (this.conf.log.level || 'info') + ' mode');
+    // winston.info('Logging starting in ' + (this.conf.log.level || 'info') + ' mode');
 
-    if (this.conf.log) {
-      if (this.conf.log.file) {
-        winston.add(winston.transports.File, {
-          filename: this.conf.log.file, //|| '/var/log/engine.log',
-          timestamp: true,
-          maxsize: 1000000,
-        });
-        winston.info('Logs will be written to ' + (this.conf.log.file || '/var/log/engine.log'));
-      }
+    // if (this.conf.log) {
+    //   if (this.conf.log.file) {
+    //     winston.add(winston.transports.File, {
+    //       filename: this.conf.log.file, //|| '/var/log/engine.log',
+    //       timestamp: true,
+    //       maxsize: 1000000,
+    //     });
+    //     winston.info('Logs will be written to ' + (this.conf.log.file || '/var/log/engine.log'));
+    //   }
 
-      if (this.conf.log.host && this.conf.log.port) {
-        winston.add(winston.transports.Papertrail, {
-          host: this.conf.log.host,
-          port: this.conf.log.port,
-          program: conf.name || this.conf.id,
-        });
-        winston.info(`Remote logging enabled to ${this.conf.log.host}:${this.conf.log.port}`);
-      }
-    }
+    //   if (this.conf.log.host && this.conf.log.port) {
+    //     winston.add(winston.transports.Papertrail, {
+    //       host: this.conf.log.host,
+    //       port: this.conf.log.port,
+    //       program: conf.name || this.conf.id,
+    //     });
+    //     winston.info(`Remote logging enabled to ${this.conf.log.host}:${this.conf.log.port}`);
+    //   }
+    // }
 
-    this._logger = winston;
+    // this._logger = winston;
   }
 
   log(context) {
-    return new Log(this, context || 'global', this.conf);
+    return new Log(context || 'global', this.conf);
   }
 }
 
 class Log {
   private _debug;
-  constructor(private logger: Logger, private context: string, private conf: any) {
+
+  constructor(private context: string, private conf: any) {
     this.conf = conf || {};
     this.conf.component = context;
     this.context = context.toLowerCase();
@@ -101,34 +102,31 @@ class Log {
     const msg = this.contextify(
       message.error_description ? message.error_description + ' (' + message.trace + ')' : message
     );
-    this.logger.trace = msg;
     this._debug(msg);
   }
   info(message) {
     const msg = this.contextify(
       message.error_description ? message.error_description + ' (' + message.trace + ')' : message
     );
-    this.logger.trace = msg;
-    this.logger.logger.info(msg);
+    this._debug(msg);
   }
   warn(message) {
     const msg = this.contextify(
       message.error_description ? message.error_description + ' (' + message.trace + ')' : message
     );
 
-    this.logger.trace = msg;
-    this.logger.logger.warn(msg);
+    this._debug(msg);
   }
   error(message) {
-    this.logger.logger.error(
-      `********** ERROR ***********\n${this.logger.trace}${
+    this._debug(
+      `********** ERROR ***********\n${
         message.error_description ? this.contextify(`${JSON.stringify(message, null, 2)} ${message.stack}`) : message
       }\n${message.stack ? message.stack + '\n' : ''}********** ERROR END *********`
     );
   }
   emergency(message) {
-    this.logger.logger.emergency(
-      `********** EMERGENCY ***********\n${this.logger.trace}${
+    this._debug(
+      `********** EMERGENCY ***********\n${
         message.error ? this.contextify(`${JSON.stringify(message, null, 2)}`) : message
       }\n${message.stack ? message.stack + '\n' : ''}********** EMERGENCY END *********`
     );
