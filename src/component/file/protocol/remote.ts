@@ -8,7 +8,7 @@ let logger;
 
 export class RemoteProtocol {
   constructor(private _system: Engine, private _conf) {
-    logger = _system.log.log('engine:file:local');
+    logger = _system.log.log('engine:file:remote');
   }
 
   async init(): Promise<any> {

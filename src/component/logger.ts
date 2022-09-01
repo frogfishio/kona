@@ -29,11 +29,9 @@ export class Logger {
     // if (conf.live === true) {
     //   colorize = false;
     // }
-
     // const winston = require('winston');
     // // tslint:disable-next-line:no-unused-expression
     // require('winston-papertrail').Papertrail;
-
     // winston.setLevels({
     //   debug: 7,
     //   info: 6,
@@ -41,7 +39,6 @@ export class Logger {
     //   error: 3,
     //   emergency: 0,
     // });
-
     // winston.addColors({
     //   debug: 'cyan',
     //   info: 'green',
@@ -49,17 +46,13 @@ export class Logger {
     //   error: 'red',
     //   emergency: 'magenta',
     // });
-
     // winston.remove(winston.transports.Console);
     // winston.add(winston.transports.Console, {
     //   colorize: colorize,
     //   stderrLevels: ['error', 'fatal'],
     // });
-
     // winston.level = this.conf.log ? this.conf.log.level || 'info' : 'info';
-
     // winston.info('Logging starting in ' + (this.conf.log.level || 'info') + ' mode');
-
     // if (this.conf.log) {
     //   if (this.conf.log.file) {
     //     winston.add(winston.transports.File, {
@@ -69,7 +62,6 @@ export class Logger {
     //     });
     //     winston.info('Logs will be written to ' + (this.conf.log.file || '/var/log/engine.log'));
     //   }
-
     //   if (this.conf.log.host && this.conf.log.port) {
     //     winston.add(winston.transports.Papertrail, {
     //       host: this.conf.log.host,
@@ -79,7 +71,6 @@ export class Logger {
     //     winston.info(`Remote logging enabled to ${this.conf.log.host}:${this.conf.log.port}`);
     //   }
     // }
-
     // this._logger = winston;
   }
 
@@ -128,8 +119,11 @@ class Log {
     this._debug(
       `********** EMERGENCY ***********\n${
         message.error ? this.contextify(`${JSON.stringify(message, null, 2)}`) : message
-      }\n${message.stack ? message.stack + '\n' : ''}********** EMERGENCY END *********`
+      }\n${message.stack ? message.stack + '\n' : ''}`
     );
+
+    this.debug(new Error().stack);
+    this.debug('********** EMERGENCY END *********');
   }
 
   // info: <engine> environment:prod tenant:lovecroatia module:api component:responder @tag:coolapp Message
