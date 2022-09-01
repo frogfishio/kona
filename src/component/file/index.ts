@@ -5,6 +5,7 @@ import { LocalProtocol } from './protocol/local';
 // import { S3Protocol } from './protocol/s3';
 import { DB } from '../db/index';
 import { ReadStream } from 'fs';
+import { RemoteProtocol } from './protocol/remote';
 
 let logger;
 
@@ -40,11 +41,14 @@ export class Files implements Component {
           case 'local':
             this.connectors[connectorName] = new LocalProtocol(this.engine, this.conf[connectorName]);
             return this.connectors[connectorName].init();
+          case 'remote':
+            this.connectors[connectorName] = new RemoteProtocol(this.engine, this.conf[connectorName]);
+            return this.connectors[connectorName].init();
           // case 's3':
           //   this.connectors[connectorName] = new S3Protocol(this.engine, this.conf[connectorName]);
           //   return this.connectors[connectorName].init();
           default:
-            return Promise.reject('Unsuported file protocol');
+            return Promise.reject(`Unsuported file protocol ${this.conf[connectorName].type}`);
         }
       });
     }, Promise.resolve());
@@ -67,10 +71,10 @@ export class Files implements Component {
     return new Promise((resolve, reject) => {});
   }
 
-  async create(fileName: string, file: ReadableStream, fileStoreName?: string, meta?: any): Promise<any> {
+  async create(fileName: string, file: ReadableStream, fileStoreName: string, meta?: any): Promise<any> {
     fileStoreName = fileStoreName || Object.getOwnPropertyNames(this.conf)[0];
 
-    return this.connectors[fileStoreName].create(file).then((result) => {
+    return this.connectors[fileStoreName].create(file, fileName).then((result) => {
       if (!this.conf[fileStoreName].track) {
         return Promise.resolve({ id: result.id });
       }
@@ -78,7 +82,6 @@ export class Files implements Component {
       const fileInfo: any = {
         digest: result.digest,
         length: result.length,
-        // payload: result.id,
         mime: result.mime,
         name: fileName,
         meta: meta,

@@ -16,7 +16,7 @@ export class LocalProtocol {
     });
   }
 
-  async create(file): Promise<any> {
+  async create(file, name?: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const fs = require('fs');
       const uuid = require('uuid').v4();

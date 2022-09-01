@@ -139,7 +139,7 @@ export class Auth implements Component {
   l;
 
   private static sanitizeParams(params) {
-    return {
+    const sanitised = {
       grant_type: params.grant_type,
       scope: params.scope,
       email: params.email,
@@ -147,6 +147,8 @@ export class Auth implements Component {
       client_id: params.client_id,
       code: params.code,
     };
+    logger.debug(JSON.stringify(sanitised, null, 2));
+    return sanitised;
   }
 
   private static validateParams(params) {
