@@ -2,7 +2,6 @@ import { ApplicationError } from '../../error';
 import { Component } from '..';
 import { Engine } from '../..';
 import { User } from '../user';
-import { Authenticator } from '../../types';
 import { Account } from '../account';
 
 let logger;
@@ -115,7 +114,7 @@ export class Auth implements Component {
 
     let user;
     try {
-      user = await userAPI.getUserByEmailAndPassword(params.email, params.password, context);
+      user = await userAPI.getUserByEmailAndPassword(params.username, params.password, context);
     } catch (err) {
       if (err.error === 'not_found') {
         throw new ApplicationError('not_found', 'User with supplied credentials not found', 'sys_ayuth_p1');
@@ -142,7 +141,7 @@ export class Auth implements Component {
     const sanitised = {
       grant_type: params.grant_type,
       scope: params.scope,
-      email: params.email,
+      username: params.username,
       password: params.password,
       client_id: params.client_id,
       code: params.code,
@@ -164,8 +163,8 @@ export class Auth implements Component {
 
     switch (params.grant_type) {
       case 'password':
-        if (!params.email) {
-          throw new ApplicationError('validation_error', 'Email must be specified', 'system_auth_validate3');
+        if (!params.username) {
+          throw new ApplicationError('validation_error', 'Username must be specified', 'system_auth_validate3');
         }
 
         if (!params.password) {
