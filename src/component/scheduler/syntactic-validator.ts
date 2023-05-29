@@ -9,7 +9,7 @@ export class SyntacticJobValidator {
     if (!data) {
       throw new ApplicationError('validation_error', 'Job must have version', 'engine_scheduler_val_ver1');
     }
-    if (parseInt('' + data) === NaN) {
+    if (Number.isNaN(parseInt('' + data))) {
       throw new ApplicationError('validation_error', 'Job version must be numeric', 'engine_scheduler_val_ver2');
     }
     return parseInt('' + data);
@@ -165,7 +165,7 @@ export class SyntacticJobValidator {
       }
 
       // day of month
-      if (!pass && parseInt(run.model[0]) !== NaN) {
+      if (!pass && !Number.isNaN(parseInt(run.model[0]))) {
         pass = true;
 
         if (parseInt(run.model[0]) > 31) {
