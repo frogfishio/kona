@@ -45,6 +45,7 @@ file:
   content:
     track: true
     type: s3
+    endpoint: <url>
     store: <bucket>
     key: <key>
     secret: <secret>

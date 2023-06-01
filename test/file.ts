@@ -20,7 +20,7 @@ describe('File', () => {
       (
         await engine.auth.authenticate({
           grant_type: 'password',
-          email: `testadmin@frogfish.com`,
+          username: `testadmin@frogfish.com`,
           password: `testpassword`,
         })
       ).access_token;
@@ -28,7 +28,7 @@ describe('File', () => {
 
   it('should upload file', async () => {
     const rs = fs.createReadStream('test/test.jpg');
-    testFile = await engine.files.create(`test_file_${TIME}.jpg`, rs, 'images', { hello: 'world' });
+    testFile = await engine.files.create(`test_file_${TIME}.jpg`, rs, 'test', { hello: 'world' });
     console.log(JSON.stringify(testFile));
     expect(testFile).to.have.property('name').which.equals(`test_file_${TIME}.jpg`);
   });

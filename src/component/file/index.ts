@@ -2,7 +2,7 @@ import { Engine } from '../..';
 import { Component } from '../index';
 
 import { LocalProtocol } from './protocol/local';
-// import { S3Protocol } from './protocol/s3';
+import { S3Protocol } from './protocol/s3';
 import { DB } from '../db/index';
 import { ReadStream } from 'fs';
 import { RemoteProtocol } from './protocol/remote';
@@ -44,9 +44,9 @@ export class Files implements Component {
           case 'remote':
             this.connectors[connectorName] = new RemoteProtocol(this.engine, this.conf[connectorName]);
             return this.connectors[connectorName].init();
-          // case 's3':
-          //   this.connectors[connectorName] = new S3Protocol(this.engine, this.conf[connectorName]);
-          //   return this.connectors[connectorName].init();
+          case 's3':
+            this.connectors[connectorName] = new S3Protocol(this.engine, this.conf[connectorName]);
+            return this.connectors[connectorName].init();
           default:
             return Promise.reject(`Unsuported file protocol ${this.conf[connectorName].type}`);
         }
